@@ -1,0 +1,15 @@
+{
+  "name": "babylon-scene",
+  "version": "0.1.0",
+  "dependencies": {
+    "babylonjs": "^4.0.3"
+  },
+  "devDependencies": {
+    "rollup": "^1.19.4",
+    "rollup-plugin-ignore-import": "^1.2.0",
+    "rollup-pluginutils": "^2.8.1"
+  },
+  "scripts": {
+    "build": "node_modules/.bin/rollup --config rollup.config.nobabylon.js && node_modules/.bin/rollup --config rollup.config.withbabylon.js"
+  }
+}
