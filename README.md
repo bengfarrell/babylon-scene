@@ -115,6 +115,19 @@ creating a custom application based on "BaseApplication" and add some custom stu
 </script>
 ```
 
+##### Applications by Module Path
+The <babylon-scene> component accepts an "app" attribute. This is the path to your user-defined Application class, which likely
+ extends the BaseApplication class. Though this allows you to set up a custom app really easily without having to use callbacks as above,
+ it also might be a bit awkward when using, given that the path must be relative to the "src" folder inside the component itself. If you've
+ installed <babylon-scene> to node_modules for example, you'd need to recognize that the root is in node_modules/babylon-scene/src.
+
+ But the upside is that a full custom Babylon application is very easy to create:
+
+ ```sh
+    <babylon-scene app="../demos/app.js"></babylon-scene>
+ ```
+
+
 ## Options
 
 There are only a few core options/attributes for the component itself.
@@ -122,6 +135,7 @@ There are only a few core options/attributes for the component itself.
 - customsetup (boolean) - if true, will stop setup prior to scene creation to allow the developer to inject custom logic
 - onwaiting (event) - "waiting" event fires when "customsetup" is set to true to allow the developer to inject custom logic. Not especially usable as an attribute when using <babylon-scene> as an ES6 module
 - onplaying (event) - "playing" event fires when the scene is fully setup and ready for adding logic and 3d objects. Not especially usable as an attribute when using <babylon-scene> as an ES6 module
+- app (string) - path to application to use when initializing the scene (relative to the Web Component's src folder, possibly in your node_modules folder)
 
 Beyond that, all attributes on component (except "style" and "class") will be added to a "config" object and added to the Stage setup result which is accessible from the application.
 This means that any attribute added to the component will make its way through to the Stage or custom Application. The default stage, does listen to a few attributes itself.

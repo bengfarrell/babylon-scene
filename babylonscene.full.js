@@ -55,6 +55,7 @@ var babylonscene = (function () {
             if (o.stage) {
                 o.stage.setup(o.canvas, o.config).then( stage => {
                     this.stage = stage;
+                    this.config = o.config;
                     this.stage.engine.runRenderLoop(() => {
                         this.stage.scene.render();
                         this.onRender(this.stage.engine.getDeltaTime());
@@ -71,7 +72,6 @@ var babylonscene = (function () {
                     this.onReady();
                 });
             }
-
         }
 
         onRender(deltaTime) {}
@@ -97,6 +97,15 @@ var babylonscene = (function () {
             stage.scene = this.setupScene(stage);
             stage.cameras = this.setupCameras(stage);
             stage.lights = this.setupLights(stage);
+
+            /*if (config.usewebxr) {
+                stage.webxr = this.setupWebXR(stage);
+            }
+
+            // use webvr as solo option, or fallback when WebXR isn't available
+            if (config.usewebvr && (!config.usewebxr || stage.webxr === 'failed')) {
+                stage.webvr = this.setupWebVR(stage);
+            }*/
             return stage;
         },
 
@@ -134,7 +143,6 @@ var babylonscene = (function () {
                 scene.clearColor = BABYLON.Color3.FromHexString(stage.config.backgroundcolor);
             }
 
-
             return scene;
         },
 
@@ -143,7 +151,37 @@ var babylonscene = (function () {
             const light = new Babylon.HemisphericLight('light', new Babylon.Vector3(0, 1, -1), stage.scene);
             light.intensity = 0.7;
             return [light];
-        }
+        },
+
+        /*async setupWebXR(stage) {
+            const xrHelper = await scene.createDefaultXRExperienceAsync();
+            if (!await xrHelper.baseExperience.sessionManager.supportsSessionAsync("immersive-vr")) {
+                return 'failed';
+            }
+
+            xrHelper.baseExperience.onStateChangedObservable.add((state)=>{
+                if(state === Babylon.WebXRState.IN_XR){
+                    // When entering webXR, position the user's feet at 0,0,-1
+                    xrHelper.baseExperience.setPositionOfCameraUsingContainer(new Babylon.Vector3(0,xrHelper.baseExperience.camera.position.y,-1))
+                }
+            });
+
+            xrHelper.input.onControllerAddedObservable.add((controller)=>{
+                stage.controller = controller;
+            });
+
+            return xrHelper;
+        },
+
+        setupWebVR(stage) {
+            const vrHelper = scene.createDefaultVRExperience();
+            vrHelper.enableInteractions();
+            vrHelper.onControllerMeshLoadedObservable.add((controller)=>{
+                stage.controller = controller;
+            });
+
+            return vrHelper;
+        }*/
     };
 
     class BabylonScene extends HTMLElement {
@@ -193,7 +231,7 @@ var babylonscene = (function () {
             this.sceneIsReady = true;
         }
 
-        connectedCallback() {
+        async connectedCallback() {
             // when using show debug layer, component gets reparented and this is called twice
             if (this._connectedCallbackFired) { return; }
             this._connectedCallbackFired = true;
@@ -211,8 +249,15 @@ var babylonscene = (function () {
             });
             this.config.babylonComponent = this;
 
+            if (this.config.app) {
+                const {default: App} = await import(this.config.app);
+                this.init(new App(this));
+                return;
+            }
+
             if (!this.config.customsetup) {
                 this.init();
+                return;
             }
 
             const ce = new CustomEvent('waiting', {

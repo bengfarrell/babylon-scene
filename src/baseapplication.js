@@ -6,6 +6,7 @@ export default class BaseApplication extends EventListener {
         if (o.stage) {
             o.stage.setup(o.canvas, o.config).then( stage => {
                 this.stage = stage;
+                this.config = o.config;
                 this.stage.engine.runRenderLoop(() => {
                     this.stage.scene.render();
                     this.onRender(this.stage.engine.getDeltaTime());
@@ -22,7 +23,6 @@ export default class BaseApplication extends EventListener {
                 this.onReady();
             });
         }
-
     }
 
     onRender(deltaTime) {}

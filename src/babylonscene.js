@@ -48,7 +48,7 @@ export default class BabylonScene extends HTMLElement {
         this.sceneIsReady = true;
     }
 
-    connectedCallback() {
+    async connectedCallback() {
         // when using show debug layer, component gets reparented and this is called twice
         if (this._connectedCallbackFired) { return; }
         this._connectedCallbackFired = true;
@@ -66,8 +66,15 @@ export default class BabylonScene extends HTMLElement {
         });
         this.config.babylonComponent = this;
 
+        if (this.config.app) {
+            const {default: App} = await import(this.config.app);
+            this.init(new App(this));
+            return;
+        }
+
         if (!this.config.customsetup) {
             this.init();
+            return;
         }
 
         const ce = new CustomEvent('waiting', {
