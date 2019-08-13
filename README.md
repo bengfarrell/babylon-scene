@@ -119,7 +119,8 @@ creating a custom application based on "BaseApplication" and add some custom stu
 The <babylon-scene> component accepts an "app" attribute. This is the path to your user-defined Application class, which likely
  extends the BaseApplication class. Though this allows you to set up a custom app really easily without having to use callbacks as above,
  it also might be a bit awkward when using, given that the path must be relative to the "src" folder inside the component itself. If you've
- installed <babylon-scene> to node_modules for example, you'd need to recognize that the root is in node_modules/babylon-scene/src.
+ installed <babylon-scene> to node_modules for example, you'd need to recognize that the root is in node_modules/babylon-scene/src. This also requires
+ not using the bundled builds of bablyon-scene.
 
  But the upside is that a full custom Babylon application is very easy to create:
 
