@@ -21,7 +21,13 @@ There are a few ways to use it. Each of the following methods will get you a com
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
 <babylon-scene useglobalbabylon></babylon-scene>
 ```
-note that there are also ways to BYOB if using the ES6 Module method, refer to the "Stage" concept further on to learn.
+
+##### BYOB (Bring your own Babylon ES6 Edition)
+```sh
+<babylon-scene babylon="path/to/babylonmodule"></babylon-scene>
+```
+
+note that there are also ways to inject if using the ES6 Module method, refer to the "Stage" concept further on to learn.
 
 ## Adding stuff to your scene
 Once the scene is ready to go, a "playing" event will be fired from the component. If not using ES6 modules, it's easy to trigger off of this event:
@@ -86,6 +92,8 @@ function customStuff(e) {
 Here we are grabbing the reference to the stage, and overwriting the "setupCameras" method to create an ArcRotateCamera instead of the Universal one, there by default.
 After modifying, we then can tell the component to run the initialization that it was waiting patiently for. The "init" method is on the component
 itself, which we can grab a reference to by "e.target".
+
+Also included on the default stage is a "babylon" setter, such that prior to application setup (onplaying) you may set the Babylon instance via JS.
 
 ##### Applications
 While putting your logic in a script tag is fine, an ES6 class based entry point for your 3D application might be more organized.

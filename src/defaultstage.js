@@ -5,7 +5,8 @@ export default {
             this.babylon = window.BABYLON;
         }
         if (!this.babylonVersion) {
-            const {default: DefaultBabylon} = await import('../web_modules/babylonjs.js');
+            const babylonPath = config.babylon ? config.babylon : '../web_modules/babylonjs.js';
+            const {default: DefaultBabylon} = await import(babylonPath);
             this.babylonVersion = DefaultBabylon;
         }
         const stage = {
