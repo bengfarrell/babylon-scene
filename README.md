@@ -151,5 +151,20 @@ This means that any attribute added to the component will make its way through t
 Keep in mind, if you override the Stage, these attributes may not work.
 
 - useglobalbabylon - if true, the Babylon instance defined on window.BABYLON will be used. Any built version included on a script tag, like on a CDN (https://cdn.babylonjs.com/babylon.js) will put this in place
+- babylon - optional path to desired ES6 Babylon module, if no other method of defining Babylon is desired (relative to component's src folder
 - showdebuglayer - if true will automatically load the Babylon.js inspector UI at start
 - backgroundcolor - when set to a hex color (#ff0000 for red as an example), the Babylon.js background color will be set to this color
+
+The BaseApplication component allows one attribute right now. As with the Stage level attributes, if another Application module is used that does not
+extend the BaseApplication provided by this component, this attribute will not work
+
+- addons - An optional comma separated list of addons to automatically use in your application. See add-ons for more details
+
+
+## Add-ons
+
+Add-ons provide mix-in style functionality to your application (added in the BaseApplication). These add-ons are ES6 modules and found in the component's
+"src/addons" folder.
+
+### Pointer add-on
+Adds onPointer and onMeshPointer handler methods to your application.

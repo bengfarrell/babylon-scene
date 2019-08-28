@@ -66,6 +66,10 @@ export default class BabylonScene extends HTMLElement {
         });
         this.config.babylonComponent = this;
 
+        if (this.config.stage) {
+            this._stage = await import(this.config.stage);
+        }
+
         if (this.config.app) {
             const {default: App} = await import(this.config.app);
             this.init(new App(this));

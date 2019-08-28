@@ -12,6 +12,12 @@ export default class BaseApplication extends EventListener {
                     this.onRender(this.stage.engine.getDeltaTime());
                 });
 
+                if (this.config.addons) {
+                    this.config.addons.split(',').forEach(addon => {
+                        this.processAddon(addon);
+                    });
+                }
+
                 this.stage.engine.resize();
 
                 window.addEventListener('resize', () => {
@@ -23,6 +29,11 @@ export default class BaseApplication extends EventListener {
                 this.onReady();
             });
         }
+    }
+
+    async processAddon(path) {
+        const a = await import(path);
+        a.default.add(this);
     }
 
     onRender(deltaTime) {}
