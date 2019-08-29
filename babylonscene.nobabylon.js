@@ -61,6 +61,12 @@ var babylonscene = (function () {
                         this.onRender(this.stage.engine.getDeltaTime());
                     });
 
+                    if (this.config.addons) {
+                        this.config.addons.split(',').forEach(addon => {
+                            this.processAddon(addon);
+                        });
+                    }
+
                     this.stage.engine.resize();
 
                     window.addEventListener('resize', () => {
@@ -74,6 +80,11 @@ var babylonscene = (function () {
             }
         }
 
+        async processAddon(path) {
+            const a = await import(path);
+            a.default.add(this);
+        }
+
         onRender(deltaTime) {}
         onResize() {}
         onReady() {}
@@ -85,7 +96,8 @@ var babylonscene = (function () {
                 this.babylon = window.BABYLON;
             }
             if (!this.babylonVersion) {
-                const {default: DefaultBabylon} = await Promise.resolve().then(function () { return babylonjs; });
+                const babylonPath = config.babylon ? config.babylon : '../web_modules/babylonjs.js';
+                const {default: DefaultBabylon} = await import(babylonPath);
                 this.babylonVersion = DefaultBabylon;
             }
             const stage = {
@@ -249,6 +261,10 @@ var babylonscene = (function () {
             });
             this.config.babylonComponent = this;
 
+            if (this.config.stage) {
+                this._stage = await import(this.config.stage);
+            }
+
             if (this.config.app) {
                 const {default: App} = await import(this.config.app);
                 this.init(new App(this));
@@ -274,12 +290,6 @@ var babylonscene = (function () {
     if (!customElements.get('babylon-scene')) {
         customElements.define('babylon-scene', BabylonScene);
     }
-
-
-
-    var babylonjs = /*#__PURE__*/Object.freeze({
-        'default': undefined
-    });
 
     return BabylonScene;
 
