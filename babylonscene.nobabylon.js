@@ -1,5 +1,7 @@
-var babylonscene = (function () {
+var babylonscene = (function (babylon) {
     'use strict';
+
+    babylon = babylon && babylon.hasOwnProperty('default') ? babylon['default'] : babylon;
 
     class EventListener {
         constructor() {
@@ -49,6 +51,27 @@ var babylonscene = (function () {
         }
     }
 
+    const pointer = {
+        add(scope) {
+            scope.stage.scene.onPointerObservable.add((pointerInfo) => {
+                if (scope.onPointer) {
+                    scope.onPointer(pointerInfo);
+                }
+
+                if (scope.onMeshPointer) {
+                    const pick = scope.stage.scene.pick(pointerInfo.event.clientX, pointerInfo.event.clientY);
+                    if (pick.hit) {
+                        scope.onMeshPointer(pick, pointerInfo);
+                    }
+                }
+            });
+        }
+    };
+
+    var Addons = /*#__PURE__*/Object.freeze({
+        pointer: pointer
+    });
+
     class BaseApplication extends EventListener {
         constructor(o) {
             super();
@@ -81,8 +104,13 @@ var babylonscene = (function () {
         }
 
         async processAddon(path) {
-            const a = await import(path);
-            a.default.add(this);
+            if (path.toLowerCase().indexOf('.js') === -1) {
+                // path is a name
+                Addons[path].add(this);
+            } else {
+                const a = await import(path);
+                a.default.add(this);
+            }
         }
 
         onRender(deltaTime) {}
@@ -112,12 +140,8 @@ var babylonscene = (function () {
 
             /*if (config.usewebxr) {
                 stage.webxr = this.setupWebXR(stage);
-            }
-
-            // use webvr as solo option, or fallback when WebXR isn't available
-            if (config.usewebvr && (!config.usewebxr || stage.webxr === 'failed')) {
-                stage.webvr = this.setupWebVR(stage);
             }*/
+
             return stage;
         },
 
@@ -164,6 +188,29 @@ var babylonscene = (function () {
             light.intensity = 0.7;
             return [light];
         },
+
+        /*async setupWebXR(stage) {
+            // missing function?
+            if(navigator.xr && !navigator.xr.supportsSession) {
+                navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
+
+                let originalRequestSession = navigator.xr.requestSession;
+                // change signature
+                navigator.xr.requestSession = function(mode, options) {
+                    return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
+                        let requestReferenceSpace = session.requestReferenceSpace;
+
+                        // change signature
+                        session.requestReferenceSpace = function(type) {
+                            return requestReferenceSpace.call(this, {type: "identity"});
+                        };
+
+                        return session;
+                    });
+                };
+            }
+
+        }*/
 
         /*async setupWebXR(stage) {
             const xrHelper = await scene.createDefaultXRExperienceAsync();
@@ -293,5 +340,5 @@ var babylonscene = (function () {
 
     return BabylonScene;
 
-}());
+}(babylon));
 //# sourceMappingURL=babylonscene.nobabylon.js.map

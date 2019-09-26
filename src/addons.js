@@ -1,4 +1,4 @@
-export default {
+export const pointer = {
     add(scope) {
         scope.stage.scene.onPointerObservable.add((pointerInfo) => {
             if (scope.onPointer) {
@@ -13,4 +13,5 @@ export default {
             }
         });
     }
-}
+};
+

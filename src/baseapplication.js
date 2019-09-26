@@ -1,4 +1,5 @@
 import EventListener from './eventlistener.js';
+import * as Addons from './addons.js';
 
 export default class BaseApplication extends EventListener {
     constructor(o) {
@@ -32,8 +33,13 @@ export default class BaseApplication extends EventListener {
     }
 
     async processAddon(path) {
-        const a = await import(path);
-        a.default.add(this);
+        if (path.toLowerCase().indexOf('.js') === -1) {
+            // path is a name
+            Addons[path].add(this);
+        } else {
+            const a = await import(path);
+            a.default.add(this);
+        }
     }
 
     onRender(deltaTime) {}

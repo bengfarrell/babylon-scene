@@ -1,4 +1,5 @@
 import BabylonScene from './babylonscene.js';
+import BabylonImport from 'babylon';
 export default {
     async setup(canvas, config) {
         if (config.useglobalbabylon) {
@@ -21,12 +22,8 @@ export default {
 
         /*if (config.usewebxr) {
             stage.webxr = this.setupWebXR(stage);
-        }
-
-        // use webvr as solo option, or fallback when WebXR isn't available
-        if (config.usewebvr && (!config.usewebxr || stage.webxr === 'failed')) {
-            stage.webvr = this.setupWebVR(stage);
         }*/
+
         return stage;
     },
 
@@ -73,6 +70,29 @@ export default {
         light.intensity = 0.7;
         return [light];
     },
+
+    /*async setupWebXR(stage) {
+        // missing function?
+        if(navigator.xr && !navigator.xr.supportsSession) {
+            navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
+
+            let originalRequestSession = navigator.xr.requestSession;
+            // change signature
+            navigator.xr.requestSession = function(mode, options) {
+                return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
+                    let requestReferenceSpace = session.requestReferenceSpace;
+
+                    // change signature
+                    session.requestReferenceSpace = function(type) {
+                        return requestReferenceSpace.call(this, {type: "identity"});
+                    };
+
+                    return session;
+                });
+            };
+        }
+
+    }*/
 
     /*async setupWebXR(stage) {
         const xrHelper = await scene.createDefaultXRExperienceAsync();
