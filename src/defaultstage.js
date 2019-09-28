@@ -1,5 +1,5 @@
 import BabylonScene from './babylonscene.js';
-import BabylonImport from 'babylon';
+
 export default {
     async setup(canvas, config) {
         if (config.useglobalbabylon) {
