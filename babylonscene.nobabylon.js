@@ -1,7 +1,5 @@
-var babylonscene = (function (babylon) {
+var babylonscene = (function () {
     'use strict';
-
-    babylon = babylon && babylon.hasOwnProperty('default') ? babylon['default'] : babylon;
 
     class EventListener {
         constructor() {
@@ -340,5 +338,5 @@ var babylonscene = (function (babylon) {
 
     return BabylonScene;
 
-}(babylon));
+}());
 //# sourceMappingURL=babylonscene.nobabylon.js.map
