@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ES6 Module based Custom Application</title>
+    <script src="../../babylonscene.js" type="module"></script>
+
+
+    <style>
+        babylon-scene {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>ES6 Module based Custom Application</h1>
+<p>
+    In this demo, we use the "app" attribute on the &lt;babylon-scene&gt; component. The "app" attribute is a
+    file path relative to the current HTML page that points to an ES6 based module class which controls your
+    Babylon.js based 3D application.
+</p>
+
+<h2>Using the "app" attribute</h2>
+<p>
+    Internally, the "app" attribute is used by a dynamic module importer. A URL resolver is used to make the path you
+    pass relative to the page, as otherwise it would be relative to the component source, likely deep in your node_modules foler.
+</p>
+
+<h2>Inside your Custom Application</h2>
+<p>
+    There are various ways of loading Babylon.js as discussed in the <a href="../babylon-loading/index.html">Loading Babylon Demos</a>.
+    I've chosen the pure ES6 module way here, as I think it's the best way forward in terms of having a completely module based application.
+    It's also the most complicated as each piece used by the Stage setup routine needs to be imported here and wrapped in an object.
+</p>
+
+<pre>
+    import BaseApplication from '../../src/baseapplication.js';
+
+    import { Engine } from "@babylonjs/core/Engines/engine";
+    import { Scene } from "@babylonjs/core/scene";
+    import { Vector3, Color3 } from "@babylonjs/core/Maths/math";
+    import { UniversalCamera } from "@babylonjs/core/Cameras/UniversalCamera";
+    import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
+    import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder.js";
+    import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+</pre>
+
+<p>
+    Breaking the above down, first we import the "BaseApplication" from the &lt;babylon-scene&gt; component's source folder.
+    The Base Application does all of the scene setup work, and can be extended as we do here to provide the application logic
+    associated with your custom application.
+</p>
+
+<p>
+    The remaining imports are used to provide the "Stage" with the functionality it needs to setup the scene. Currently,
+    the default "Stage" creates a Universal Camera, Hemispheric Light, and may change the background color if the "backgroundcolor"
+    attribute is set on the component.
+</p>
+
+<p>
+    Engine, Scene, and Vector3 are non-negotiable and needed for any scene setup (even if your "Stage" logic changes).
+    MeshBuilder and StandardMaterial, on the other hand, are only needed locally here in this demo to build the cube mesh.
+</p>
+
+<p>
+    Next, we'll create the class, and provide Babylon.js to the "Stage" setup to create the scene.
+</p>
+
+<pre>
+    export default class extends BaseApplication {
+        static get Babylon() {
+            return {
+                Engine: Engine,
+                Scene: Scene,
+                UniversalCamera: UniversalCamera,
+                Vector3: Vector3,
+                Color3: Color3,
+                HemisphericLight: HemisphericLight
+            };
+        }
+</pre>
+
+<p>
+    Again, our application extends BaseApplication which handles our scene creation. Extending this allows you to
+    build off of this and create a custom application.
+</p>
+
+<p>
+    Our custom application class can also offer a static Babylon getter. This getter exposes the Babylon.js library
+    (or just whatever components are needed for setup). As we are using Babylon.js as a set of ES6 imports in this example,
+    we can provide exactly the pieces our "stage" setup needs to complete its job. However, much easier, would be to
+    consume Babylon in ES6 legacy mode, or not as ES6 at all. We could instead return the entire Babylon package here.
+</p>
+
+<pre>
+    import * as Babylon from '@babylonjs/core/Legacy/legacy';
+
+    static get Babylon() { return Babylon; }
+</pre>
+
+<p>
+    We could simply return window.BABYLON if Babylon.js was loaded from a normal non-module based script tag,
+    however, in this case, Babylon.js would be automatically found and used by setup without needing to explicitly
+    pass it from this class. If using this method, it's best to not include this static getter, because it would
+    be ignored entirely unless specifically setting the "useglobalbabylon" attribute to "false".
+</p>
+
+<p>
+    As Babylon.js uses bare module imports, a plain HTTP server will not be able to accommodate running Babylon.js this way.
+    Instead, <a href="https://open-wc.org/developing/es-dev-server.html">Open WC's ES Dev Server</a> is a great solution.
+</p>
+
+<h2>Application Lifecycle</h2>
+
+<p>
+    In addition to overriding the constructor, as with any class, there are a few lifecycle methods that are empty
+    in the BaseApplication class that can be overridden in a custom application.
+</p>
+
+<h3>onReady</h3>
+The Babylon.js scene is fully setup and ready to go. This is where you would likely add your custom meshes and objects
+for your custom 3D scene. While adding cameras and lights here is entirely possible, the intention is for your to do
+so in a custom "stage". This lets your application focus squarely on content.
+
+<pre>
+    onReady() {
+        const Babylon = this.stage.babylon;
+        const cube = Babylon.MeshBuilder.CreateBox("cube", {height: 4, width: 4, depth: 4}, this.stage.scene);
+        cube.position.y = 1;
+        cube.position.z = 5;
+    }
+</pre>
+
+<h3>onResize</h3>
+<p>
+    This lifecycle method is called when the page resizes. You may want to take action here as the canvas scales down.
+</p>
+
+<h3>onRender</h3>
+<p>
+    This lifecycle method is called every render frame, as a standard game engine might do. The first, and only parameter that
+    comes in on the onRender method is a "deltatime" parameter. This tells you, in milliseconds, how much time has elapsed since the last frame.
+</p>
+
+<h3>stage</h3>
+<p>
+    The base application provides a property called "stage", which you may access by calling "this.stage" from inside the class.
+    This gives you access to the Babylon Engine, Scene, Lights, Cameras, and Babylon library created/used during stage setup.
+</p>
+
+<h3>config</h3>
+<p>
+    The base application provides a property called "config", which you may access by calling "this.config" from inside the class.
+    This provides access to the configuration object which not only drives setup, but captures any &lt;babylon-scene&gt; attributes
+    used (even ones that aren't supported and could be custom to your application).
+</p>
+
+<babylon-scene app="app-es6-module.js"></babylon-scene>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Babylon.js ES6 Loading</title>
+</head>
+<body>
+    <p>
+        Babylon.js supports consumption as <a href="https://doc.babylonjs.com/features/es6_support">ES6 modules</a>
+        There are two flavors of using Babylon.js as an ES6 module. Because Babylon.js uses bare import modules, either
+        a bundler or special server is required. That's why this demo is separate from the rest of the documentation.
+        It's intended to be run from the babylon-scene repo itself where both <a href="https://www.npmjs.com/package/@babylonjs/core">@babyloncore</a>
+        and <a href="https://www.npmjs.com/package/es-dev-server">es-dev-server</a> are installed.
+    </p>
+
+    <p>
+        To run these demos, use <strong>npm run dev</strong> from the &lt;babylon-scene&gt; project root
+    </p>
+
+    <p>
+        The first way of consuming Babylon.js as a module is to consume the entire library as a single module.
+        Babylon.js calls this "legacy" as per their documentation.
+    </p>
+
+    <a href="babylon-loading/es6-babylon-module-legacy.html">Demo of Babylon as ES6 (Legacy)</a>
+
+    <p>
+        More complex because importing each individual part of Babylon.js that you use is required,
+        non-legacy is more in the spirit of ES6 modules because you only use exactly the modules you need
+    </p>
+    <a href="babylon-loading/es6-babylon-module.html">Demo of Babylon as ES6</a>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Using Built-in Babylon</title>
+    <script src="../../babylonscene.full.js"></script>
+
+
+    <style>
+        babylon-scene {
+            width: 300px;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Using Built-in Babylon</h1>
+<p>
+    In this demo, Babylon is brought in through the "babylonscene.full.js" variation of the &lt;babylon-scene&gt;
+    component. As the attribute "useglobalbabylon" is NOT specified, the presence of Babylon is detected by
+    inspecting window.BABYLON. As it is present, this Babylon.js instance is used.
+</p>
+
+<babylon-scene app="sample-app.js" stage="custom-stage.js"></babylon-scene>
+</body>
+</html>

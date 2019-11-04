@@ -71,10 +71,13 @@ var babylonscene = (function () {
     });
 
     class BaseApplication extends EventListener {
+
+        static get Babylon() { return null; }
+
         constructor(o) {
             super();
             if (o.stage) {
-                o.stage.setup(o.canvas, o.config).then( stage => {
+                o.stage.setup(o.canvas, o.config, this).then( stage => {
                     this.stage = stage;
                     this.config = o.config;
                     this.stage.engine.runRenderLoop(() => {
@@ -103,7 +106,7 @@ var babylonscene = (function () {
 
         async processAddon(path) {
             if (path.toLowerCase().indexOf('.js') === -1) {
-                // path is a name
+                // path is a built-in name
                 Addons[path].add(this);
             } else {
                 const a = await import(path);
@@ -117,20 +120,13 @@ var babylonscene = (function () {
     }
 
     var DefaultStage = {
-        async setup(canvas, config) {
-            if (config.useglobalbabylon) {
-                this.babylon = window.BABYLON;
-            }
-            if (!this.babylonVersion) {
-                const babylonPath = config.babylon ? config.babylon : '../web_modules/babylonjs.js';
-                const {default: DefaultBabylon} = await import(babylonPath);
-                this.babylonVersion = DefaultBabylon;
-            }
+        async setup(canvas, config, clazz) {
             const stage = {
                 canvas: canvas,
-                babylon: this.babylonVersion,
-                config: config
+                config: config,
+                app: clazz,
             };
+            stage.babylon = this.setupBabylon(stage);
             stage.engine = this.setupEngine(stage);
             stage.scene = this.setupScene(stage);
             stage.cameras = this.setupCameras(stage);
@@ -143,14 +139,31 @@ var babylonscene = (function () {
             return stage;
         },
 
-        set babylon(b) {
-            this.babylonVersion = b;
+        setupBabylon(stage) {
+            // if user does not specify, auto-detect if BABYLON is present
+            if (!stage.config.useglobalbabylon) {
+                if (window.BABYLON) { return window.BABYLON; }
+            }
+
+            // if user does specify with true or no value, use BABYLON, error if not present
+            if (stage.config.useglobalbabylon === true || stage.config.useglobalbabylon === "true") {
+                if (window.BABYLON) {
+                    return window.BABYLON;
+                } else {
+                    throw new Error('Babylon is not loaded, setup cannot continue, ensure that window.BABYLON exists')
+                }
+            }
+
+            // Babylon provided by application?
+            if (stage.app.constructor.Babylon) {
+                return stage.app.constructor.Babylon;
+            }
         },
 
         setupCameras(stage) {
             const Babylon = stage.babylon;
-            const camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 0, -10), stage.scene);
-            camera.setTarget(BABYLON.Vector3.Zero());
+            const camera = new Babylon.UniversalCamera("UniversalCamera", new Babylon.Vector3(0, 0, -10), stage.scene);
+            camera.setTarget(Babylon.Vector3.Zero());
             camera.attachControl(stage.canvas, true);
             return [camera];
         },
@@ -174,7 +187,7 @@ var babylonscene = (function () {
             }
 
             if (stage.config.backgroundcolor) {
-                scene.clearColor = BABYLON.Color3.FromHexString(stage.config.backgroundcolor);
+                scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
             }
 
             return scene;
@@ -241,6 +254,93 @@ var babylonscene = (function () {
         }*/
     };
 
+    /**
+     * from https://github.com/btford/url-resolver.js
+     */
+
+    var urlParsingNode = document.createElement("a");
+    var originUrl = urlResolve(window.location.href);
+
+
+    /**
+     *
+     * Implementation Notes for non-IE browsers
+     * ----------------------------------------
+     * Assigning a URL to the href property of an anchor DOM node, even one attached to the DOM,
+     * results both in the normalizing and parsing of the URL.  Normalizing means that a relative
+     * URL will be resolved into an absolute URL in the context of the application document.
+     * Parsing means that the anchor node's host, hostname, protocol, port, pathname and related
+     * properties are all populated to reflect the normalized URL.  This approach has wide
+     * compatibility - Safari 1+, Mozilla 1+, Opera 7+,e etc.  See
+     * http://www.aptana.com/reference/html/api/HTMLAnchorElement.html
+     *
+     * Implementation Notes for IE
+     * ---------------------------
+     * IE >= 8 and <= 10 normalizes the URL when assigned to the anchor node similar to the other
+     * browsers.  However, the parsed components will not be set if the URL assigned did not specify
+     * them.  (e.g. if you assign a.href = "foo", then a.protocol, a.host, etc. will be empty.)  We
+     * work around that by performing the parsing in a 2nd step by taking a previously normalized
+     * URL (e.g. by assigning to a.href) and assigning it a.href again.  This correctly populates the
+     * properties such as protocol, hostname, port, etc.
+     *
+     * IE7 does not normalize the URL when assigned to an anchor node.  (Apparently, it does, if one
+     * uses the inner HTML approach to assign the URL as part of an HTML snippet -
+     * http://stackoverflow.com/a/472729)  However, setting img[src] does normalize the URL.
+     * Unfortunately, setting img[src] to something like "javascript:foo" on IE throws an exception.
+     * Since the primary usage for normalizing URLs is to sanitize such URLs, we can't use that
+     * method and IE < 8 is unsupported.
+     *
+     * References:
+     *   http://developer.mozilla.org/en-US/docs/Web/API/HTMLAnchorElement
+     *   http://www.aptana.com/reference/html/api/HTMLAnchorElement.html
+     *   http://url.spec.whatwg.org/#urlutils
+     *   https://github.com/angular/angular.js/pull/2902
+     *   http://james.padolsey.com/javascript/parsing-urls-with-the-dom/
+     *
+     * @function
+     * @param {string} url The URL to be parsed.
+     * @description Normalizes and parses a URL.
+     * @returns {object} Returns the normalized URL as a dictionary.
+     *
+     *   | member name   | Description    |
+     *   |---------------|----------------|
+     *   | href          | A normalized version of the provided URL if it was not an absolute URL |
+     *   | protocol      | The protocol including the trailing colon                              |
+     *   | host          | The host and port (if the port is non-default) of the normalizedUrl    |
+     *   | search        | The search params, minus the question mark                             |
+     *   | hash          | The hash string, minus the hash symbol
+     *   | hostname      | The hostname
+     *   | port          | The port, without ":"
+     *   | pathname      | The pathname, beginning with "/"
+     *
+     */
+    function urlResolve(url, base) {
+        var href = url;
+
+        /*if (msie) {
+            // Normalize before parse.  Refer Implementation Notes on why this is
+            // done in two steps on IE.
+            urlParsingNode.setAttribute("href", href);
+            href = urlParsingNode.href;
+        }*/
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+            href: urlParsingNode.href,
+            protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+            host: urlParsingNode.host,
+            search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+            hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+            hostname: urlParsingNode.hostname,
+            port: urlParsingNode.port,
+            pathname: (urlParsingNode.pathname.charAt(0) === '/')
+                ? urlParsingNode.pathname
+                : '/' + urlParsingNode.pathname
+        };
+    }
+
     class BabylonScene extends HTMLElement {
         static get CUSTOM_SETUP() {
             return 'customsetup';
@@ -253,8 +353,6 @@ var babylonscene = (function () {
             this.attachShadow({mode: 'open'});
             this.canvas = document.createElement('canvas');
             this.shadowRoot.appendChild(this.canvas);
-            this._stage = DefaultStage;
-
         }
 
         init(app) {
@@ -298,20 +396,27 @@ var babylonscene = (function () {
             this.canvas.style.height = '100%';
 
             this.config = {};
+
             this.getAttributeNames().forEach( attr => {
                 const val = this.getAttribute(attr) ? this.getAttribute(attr) : true;
                 if (attr !== 'style' && attr !== 'class') {
                     this.config[attr] = val;
                 }
             });
+
             this.config.babylonComponent = this;
 
             if (this.config.stage) {
-                this._stage = await import(this.config.stage);
+                const absPath = urlResolve(this.config.stage).href;
+                const {default: CustomStage} = await import(absPath);
+                this._stage = CustomStage;
+            } else {
+                this._stage = DefaultStage;
             }
 
             if (this.config.app) {
-                const {default: App} = await import(this.config.app);
+                const absPath = urlResolve(this.config.app).href;
+                const {default: App} = await import(absPath);
                 this.init(new App(this));
                 return;
             }

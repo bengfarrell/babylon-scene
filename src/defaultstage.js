@@ -1,24 +1,30 @@
 import BabylonScene from './babylonscene.js';
 
 export default {
-    async setup(canvas, config) {
-        if (config.useglobalbabylon) {
-            this.babylon = window.BABYLON;
-        }
-        if (!this.babylonVersion) {
-            const babylonPath = config.babylon ? config.babylon : '../web_modules/babylonjs.js';
-            const {default: DefaultBabylon} = await import(babylonPath);
-            this.babylonVersion = DefaultBabylon;
-        }
+    async setup(canvas, config, clazz) {
         const stage = {
             canvas: canvas,
-            babylon: this.babylonVersion,
-            config: config
+            config: config,
+            app: clazz,
         };
+        stage.babylon = this.setupBabylon(stage);
         stage.engine = this.setupEngine(stage);
         stage.scene = this.setupScene(stage);
-        stage.cameras = this.setupCameras(stage);
-        stage.lights = this.setupLights(stage);
+
+        const cameras = this.setupCameras(stage);
+        if (!Array.isArray(cameras))  {
+            stage.cameras = [cameras];
+        }  else {
+            stage.cameras = cameras;
+        }
+
+        const lights = this.setupLights(stage);
+        if (!Array.isArray(lights))  {
+            stage.lights = [lights];
+        }  else {
+            stage.lights = lights;
+        }
+        stage.lights = lights;
 
         /*if (config.usewebxr) {
             stage.webxr = this.setupWebXR(stage);
@@ -27,14 +33,31 @@ export default {
         return stage;
     },
 
-    set babylon(b) {
-        this.babylonVersion = b;
+    setupBabylon(stage) {
+        // if user does not specify, auto-detect if BABYLON is present
+        if (!stage.config.useglobalbabylon) {
+            if (window.BABYLON) { return window.BABYLON; }
+        }
+
+        // if user does specify with true or no value, use BABYLON, error if not present
+        if (stage.config.useglobalbabylon === true || stage.config.useglobalbabylon === "true") {
+            if (window.BABYLON) {
+                return window.BABYLON;
+            } else {
+                throw new Error('Babylon is not loaded, setup cannot continue, ensure that window.BABYLON exists')
+            }
+        }
+
+        // Babylon provided by application?
+        if (stage.app.constructor.Babylon) {
+            return stage.app.constructor.Babylon;
+        }
     },
 
     setupCameras(stage) {
         const Babylon = stage.babylon;
-        const camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 0, -10), stage.scene);
-        camera.setTarget(BABYLON.Vector3.Zero());
+        const camera = new Babylon.UniversalCamera("UniversalCamera", new Babylon.Vector3(0, 0, -10), stage.scene);
+        camera.setTarget(Babylon.Vector3.Zero());
         camera.attachControl(stage.canvas, true);
         return [camera];
     },
@@ -58,7 +81,7 @@ export default {
         }
 
         if (stage.config.backgroundcolor) {
-            scene.clearColor = BABYLON.Color3.FromHexString(stage.config.backgroundcolor);
+            scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
         }
 
         return scene;

@@ -1,0 +1,58 @@
+# Adding Content (Stage Customization and Custom Application)
+
+```html
+<html>
+<head>
+    <script src="../babylon-scene/babylonscene.full.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        babylon-scene {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+
+    <script>
+        function onCanvas(e) {
+            e.detail.stage.setupCameras = function (stage) {
+                const Babylon = stage.babylon;
+                const scene = stage.scene;
+                const canvas = stage.canvas;
+                const camera = new Babylon.ArcRotateCamera("Camera", 0, 0, 10, new Babylon.Vector3(0, 0, 0), scene);
+                camera.setPosition(new Babylon.Vector3(0, 0, 20));
+                camera.attachControl(canvas, true);
+                return [camera];
+            };
+
+            // resume setup from the paused state by calling **init**
+            e.target.init();
+        }
+
+        function onScene(e) {
+            const scene = e.detail.scene;
+            const Babylon = e.detail.babylon;
+            const cube = Babylon.MeshBuilder.CreateBox("cube", {height: 4, width: 4, depth: 4},);
+            cube.position.y = 1;
+            cube.position.z = 5;
+        }
+    </script>
+</head>
+<body>
+<babylon-scene
+        customsetup
+        onwaiting="onCanvas(event)"
+        onplaying="onScene(event)">
+</babylon-scene>
+</body>
+</html>
+```
+
+[demo](adding-content.html ':include :type=iframe width=100% height=400px')
+

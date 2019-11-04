@@ -1,5 +1,6 @@
 import DefaultApplication from './baseapplication.js';
 import DefaultStage from './defaultstage.js';
+import {urlResolve} from "./url-resolver.js";
 
 export default class BabylonScene extends HTMLElement {
     static get CUSTOM_SETUP() {
@@ -13,8 +14,6 @@ export default class BabylonScene extends HTMLElement {
         this.attachShadow({mode: 'open'});
         this.canvas = document.createElement('canvas');
         this.shadowRoot.appendChild(this.canvas);
-        this._stage = DefaultStage;
-
     }
 
     init(app) {
@@ -40,9 +39,14 @@ export default class BabylonScene extends HTMLElement {
     }
 
     onSceneCreated() {
-        const ce = new CustomEvent('playing', {
+        const ce = new CustomEvent('ready', {
             bubbles: true,
-            detail: this.application.stage
+            detail: {
+                canvas: this.canvas,
+                stage: this._stage,
+                app: this.application,
+                config: this.config
+            }
         });
         this.dispatchEvent(ce);
         this.sceneIsReady = true;
@@ -58,20 +62,27 @@ export default class BabylonScene extends HTMLElement {
         this.canvas.style.height = '100%';
 
         this.config = {};
+
         this.getAttributeNames().forEach( attr => {
             const val = this.getAttribute(attr) ? this.getAttribute(attr) : true;
             if (attr !== 'style' && attr !== 'class') {
                 this.config[attr] = val;
             }
         });
+
         this.config.babylonComponent = this;
 
         if (this.config.stage) {
-            this._stage = await import(this.config.stage);
+            const absPath = urlResolve(this.config.stage).href;
+            const {default: CustomStage} = await import(absPath);
+            this._stage = CustomStage;
+        } else {
+            this._stage = DefaultStage;
         }
 
         if (this.config.app) {
-            const {default: App} = await import(this.config.app);
+            const absPath = urlResolve(this.config.app).href;
+            const {default: App} = await import(absPath);
             this.init(new App(this));
             return;
         }
