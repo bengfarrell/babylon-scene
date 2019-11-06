@@ -116,4 +116,4 @@ export default class extends BaseApplication {
 
 ```
 
-[demo](pointerinput.html ':include :type=iframe width=100% height=400px')
+[demo](pointerinput.html ':include :type=iframe width=100% height=500px')
