@@ -20,10 +20,14 @@
             width: 100%;
             height: 100%;
         }
-
+        
         babylon-scene {
             width: 100vw;
-            height: 100vh;
+            height: calc(100% - 100px);
+        }
+
+        #log {
+            padding: 30px;
         }
     </style>
 
@@ -36,6 +40,8 @@
         addons="pointer"
         app="pointerinputapp.js">
 </babylon-scene>
+
+<span id="log"></span>
 </body>
 </html>
 ```
@@ -88,6 +94,10 @@ export default class extends BaseApplication {
             case Babylon.PointerEventTypes.POINTERDOUBLETAP:
                 type = 'pointerdoubletap';
                 break;
+        }
+        document.getElementById('log').innerText = `${type} (${pointerInfo.event.clientX},${pointerInfo.event.clientY})`;
+        if (pointerInfo.pickInfo.pickedMesh) {
+            document.getElementById('log').innerText += ` - ${pointerInfo.pickInfo.pickedMesh.id}`;
         }
         console.log(type, pointerInfo);
     }

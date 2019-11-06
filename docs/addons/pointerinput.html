@@ -20,7 +20,11 @@
 
         babylon-scene {
             width: 100vw;
-            height: 100vh;
+            height: calc(100% - 100px);
+        }
+
+        #log {
+            padding: 30px;
         }
     </style>
 
@@ -33,5 +37,7 @@
         addons="pointer"
         app="pointerinputapp.js">
 </babylon-scene>
+
+<span id="log"></span>
 </body>
 </html>

@@ -46,6 +46,10 @@ export default class extends BaseApplication {
                 type = 'pointerdoubletap';
                 break;
         }
+        document.getElementById('log').innerText = `${type} (${pointerInfo.event.clientX},${pointerInfo.event.clientY})`;
+        if (pointerInfo.pickInfo.pickedMesh) {
+            document.getElementById('log').innerText += ` - ${pointerInfo.pickInfo.pickedMesh.id}`;
+        }
         console.log(type, pointerInfo);
     }
 
