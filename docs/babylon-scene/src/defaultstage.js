@@ -26,9 +26,9 @@ export default {
         }
         stage.lights = lights;
 
-        /*if (config.usewebxr) {
+        if (config.usewebxr) {
             stage.webxr = this.setupWebXR(stage);
-        }*/
+        }
 
         return stage;
     },
@@ -93,6 +93,26 @@ export default {
         light.intensity = 0.7;
         return [light];
     },
+
+
+    setupWebXR(stage) {
+        console.log('webxr', navigator);
+        if(navigator.xr && !navigator.xr.supportsSession) {
+            navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
+            let originalRequestSession = navigator.xr.requestSession;
+            // change signature
+            navigator.xr.requestSession = function(mode, options) {
+                return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
+                    let requestReferenceSpace = session.requestReferenceSpace;
+                    // change signature
+                    session.requestReferenceSpace = function(type) {
+                        return requestReferenceSpace.call(this, {type: "identity"});
+                    };
+                    return session;
+                });
+            };
+        }
+    }
 
     /*async setupWebXR(stage) {
         // missing function?

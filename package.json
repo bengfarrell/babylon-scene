@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "node_modules/.bin/rollup -c rollup.config.js && node ./bin/build.js",
-    "dev": "npx es-dev-server --watch --node-resolve --open docs/babylon-loading"
+    "dev": "npx es-dev-server --watch --node-resolve --open docs/babylon-loading",
+    "analyze": "wca analyze src --format json --outFile custom-elements.json"
   }
 }

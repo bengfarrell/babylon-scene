@@ -2,15 +2,43 @@ import DefaultApplication from './baseapplication.js';
 import DefaultStage from './defaultstage.js';
 import {urlResolve} from "./url-resolver.js";
 
+/**
+ * Babylon Scene Description
+ *
+ * @element babylon-scene
+ *
+ * @fires waiting - Use in combination with the "customsetup" attribute to listen for a pause where you can manipulate the stage
+ * @fires playing - Fired when the 3D scene is set up and ready for content and interactivity to be added
+ *
+ * Core Component Attributes
+ * @attr {Boolean} customsetup - if true, will stop setup prior to scene creation to allow the consumer to inject custom logic
+ * @attr {CustomEvent} onwaiting - "waiting" event fires when "customsetup" is set to true to allow the consumer to inject custom logic.
+ * @attr {CustomEvent} onplaying - "playing" event fires when the scene is fully setup and ready for adding logic and 3d objects.
+ * @attr {String} app - path to application class module (relative to your HTML file)
+ * @attr {String} stage - path to stage setup module (relative to your HTML file)
+ *
+ * Stage Attributes
+ * @attr {Boolean} showdebuglayer - if true will automatically load the Babylon.js inspector UI at start
+ * @attr {String} backgroundcolor - when set to a hex color (#ff0000 for red as an example), the Babylon.js background color will be set to this color
+ * @attr {Boolean} useglobalbabylon - if true or not set, the Babylon instance defined on window.BABYLON (if found) will be used. Any built version included on a script tag, like from a CDN (https://cdn.babylonjs.com/babylon.js) will put this in place
+ *
+ * Base Application Attributes
+ * @attr {String} addons - An optional comma separated list of addons to automatically use in your application. See add-ons for more details
+ *
+ * @prop {HTMLCanvasElement} canvas - Canvas used to render 3D scene
+ * @prop {Stage} stage - Stage, or scene configuration containing lights, cameras, etc
+ * @prop {Object} config - Object containing configuration options for component, stage, and application
+ */
+
+
 export default class BabylonScene extends HTMLElement {
+
     static get CUSTOM_SETUP() {
         return 'customsetup';
     }
 
     constructor() {
         super();
-        this.root = this;
-
         this.attachShadow({mode: 'open'});
         this.canvas = document.createElement('canvas');
         this.shadowRoot.appendChild(this.canvas);
@@ -39,14 +67,9 @@ export default class BabylonScene extends HTMLElement {
     }
 
     onSceneCreated() {
-        const ce = new CustomEvent('ready', {
+        const ce = new CustomEvent('playing', {
             bubbles: true,
-            detail: {
-                canvas: this.canvas,
-                stage: this._stage,
-                app: this.application,
-                config: this.config
-            }
+            detail: this.application.stage
         });
         this.dispatchEvent(ce);
         this.sceneIsReady = true;

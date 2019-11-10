@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Adding Content</title>
-    <script src="../babylon-scene/babylonscene.full.js"></script>
+    <title>Stage Customization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/4.0.3/babylon.js"></script>
+    <script type="module" src="../../babylonscene.js"></script>
 
     <style>
         body {
@@ -26,7 +27,7 @@
                 const scene = stage.scene;
                 const canvas = stage.canvas;
                 const camera = new Babylon.ArcRotateCamera("Camera", 0, 0, 10, new Babylon.Vector3(0, 0, 0), scene);
-                camera.setPosition(new Babylon.Vector3(0, 0, 20));
+                camera.setPosition(new Babylon.Vector3(0, 0, -20));
                 camera.attachControl(canvas, true);
                 return [camera];
             };
@@ -36,9 +37,9 @@
         }
 
         function onScene(e) {
-            const scene = e.detail.scene;
-            const Babylon = e.detail.babylon;
-            const cube = Babylon.MeshBuilder.CreateBox("cube", {height: 4, width: 4, depth: 4}, scene);
+            const scene = e.detail.stage.scene;
+            const Babylon = e.detail.stage.babylon;
+            const cube = Babylon.MeshBuilder.CreateBox("box", {size: 5}, scene);
             cube.position.y = 1;
             cube.position.z = 5;
         }
@@ -47,6 +48,7 @@
 <body>
 <babylon-scene
         customsetup
+        usewebxr
         onwaiting="onCanvas(event)"
         onplaying="onScene(event)">
 </babylon-scene>

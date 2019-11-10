@@ -70,190 +70,6 @@ var babylonscene = (function () {
         pointer: pointer
     });
 
-    class BaseApplication extends EventListener {
-
-        static get Babylon() { return null; }
-
-        constructor(o) {
-            super();
-            if (o.stage) {
-                o.stage.setup(o.canvas, o.config, this).then( stage => {
-                    this.stage = stage;
-                    this.config = o.config;
-                    this.stage.engine.runRenderLoop(() => {
-                        this.stage.scene.render();
-                        this.onRender(this.stage.engine.getDeltaTime());
-                    });
-
-                    if (this.config.addons) {
-                        this.config.addons.split(',').forEach(addon => {
-                            this.processAddon(addon);
-                        });
-                    }
-
-                    this.stage.engine.resize();
-
-                    window.addEventListener('resize', () => {
-                        this.stage.engine.resize();
-                        this.onResize();
-                    });
-
-                    this.triggerEvent(new CustomEvent('ready'));
-                    this.onReady();
-                });
-            }
-        }
-
-        async processAddon(path) {
-            if (path.toLowerCase().indexOf('.js') === -1) {
-                // path is a built-in name
-                Addons[path].add(this);
-            } else {
-                const a = await import(path);
-                a.default.add(this);
-            }
-        }
-
-        onRender(deltaTime) {}
-        onResize() {}
-        onReady() {}
-    }
-
-    var DefaultStage = {
-        async setup(canvas, config, clazz) {
-            const stage = {
-                canvas: canvas,
-                config: config,
-                app: clazz,
-            };
-            stage.babylon = this.setupBabylon(stage);
-            stage.engine = this.setupEngine(stage);
-            stage.scene = this.setupScene(stage);
-            stage.cameras = this.setupCameras(stage);
-            stage.lights = this.setupLights(stage);
-
-            /*if (config.usewebxr) {
-                stage.webxr = this.setupWebXR(stage);
-            }*/
-
-            return stage;
-        },
-
-        setupBabylon(stage) {
-            // if user does not specify, auto-detect if BABYLON is present
-            if (!stage.config.useglobalbabylon) {
-                if (window.BABYLON) { return window.BABYLON; }
-            }
-
-            // if user does specify with true or no value, use BABYLON, error if not present
-            if (stage.config.useglobalbabylon === true || stage.config.useglobalbabylon === "true") {
-                if (window.BABYLON) {
-                    return window.BABYLON;
-                } else {
-                    throw new Error('Babylon is not loaded, setup cannot continue, ensure that window.BABYLON exists')
-                }
-            }
-
-            // Babylon provided by application?
-            if (stage.app.constructor.Babylon) {
-                return stage.app.constructor.Babylon;
-            }
-        },
-
-        setupCameras(stage) {
-            const Babylon = stage.babylon;
-            const camera = new Babylon.UniversalCamera("UniversalCamera", new Babylon.Vector3(0, 0, -10), stage.scene);
-            camera.setTarget(Babylon.Vector3.Zero());
-            camera.attachControl(stage.canvas, true);
-            return [camera];
-        },
-
-        setupEngine(stage) {
-            const Babylon = stage.babylon;
-            const engine = new Babylon.Engine(stage.canvas, true);
-            engine.enableOfflineSupport = false;
-            return engine;
-        },
-
-        setupScene(stage) {
-            const Babylon = stage.babylon;
-            const scene = new Babylon.Scene(stage.engine);
-
-            if (stage.config.showdebuglayer) {
-                scene.debugLayer.show( {
-                    globalRoot: document.body,
-                    handleResize: true
-                });
-            }
-
-            if (stage.config.backgroundcolor) {
-                scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
-            }
-
-            return scene;
-        },
-
-        setupLights(stage) {
-            const Babylon = stage.babylon;
-            const light = new Babylon.HemisphericLight('light', new Babylon.Vector3(0, 1, -1), stage.scene);
-            light.intensity = 0.7;
-            return [light];
-        },
-
-        /*async setupWebXR(stage) {
-            // missing function?
-            if(navigator.xr && !navigator.xr.supportsSession) {
-                navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
-
-                let originalRequestSession = navigator.xr.requestSession;
-                // change signature
-                navigator.xr.requestSession = function(mode, options) {
-                    return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
-                        let requestReferenceSpace = session.requestReferenceSpace;
-
-                        // change signature
-                        session.requestReferenceSpace = function(type) {
-                            return requestReferenceSpace.call(this, {type: "identity"});
-                        };
-
-                        return session;
-                    });
-                };
-            }
-
-        }*/
-
-        /*async setupWebXR(stage) {
-            const xrHelper = await scene.createDefaultXRExperienceAsync();
-            if (!await xrHelper.baseExperience.sessionManager.supportsSessionAsync("immersive-vr")) {
-                return 'failed';
-            }
-
-            xrHelper.baseExperience.onStateChangedObservable.add((state)=>{
-                if(state === Babylon.WebXRState.IN_XR){
-                    // When entering webXR, position the user's feet at 0,0,-1
-                    xrHelper.baseExperience.setPositionOfCameraUsingContainer(new Babylon.Vector3(0,xrHelper.baseExperience.camera.position.y,-1))
-                }
-            });
-
-            xrHelper.input.onControllerAddedObservable.add((controller)=>{
-                stage.controller = controller;
-            });
-
-            return xrHelper;
-        },
-
-        setupWebVR(stage) {
-            const vrHelper = scene.createDefaultVRExperience();
-            vrHelper.enableInteractions();
-            vrHelper.onControllerMeshLoadedObservable.add((controller)=>{
-                stage.controller = controller;
-            });
-
-            return vrHelper;
-        }*/
-    };
-
     /**
      * from https://github.com/btford/url-resolver.js
      */
@@ -341,15 +157,261 @@ var babylonscene = (function () {
         };
     }
 
+    class BaseApplication extends EventListener {
+
+        static get Babylon() { return null; }
+
+        constructor(o) {
+            super();
+            if (o.stage) {
+                o.stage.setup(o.canvas, o.config, this).then( stage => {
+                    this.stage = stage;
+                    this.config = o.config;
+                    this.stage.engine.runRenderLoop(() => {
+                        this.stage.scene.render();
+                        this.onRender(this.stage.engine.getDeltaTime());
+                    });
+
+                    if (this.config.addons) {
+                        this.config.addons.split(',').forEach(addon => {
+                            this.processAddon(addon);
+                        });
+                    }
+
+                    this.stage.engine.resize();
+
+                    window.addEventListener('resize', () => {
+                        this.stage.engine.resize();
+                        this.onResize();
+                    });
+
+                    this.triggerEvent(new CustomEvent('ready'));
+                    this.onReady();
+                });
+            }
+        }
+
+        async processAddon(path) {
+            if (path.toLowerCase().indexOf('.js') === -1) {
+                // path is a built-in name
+                Addons[path].add(this);
+            } else {
+                const absPath = urlResolve(path);
+                const a = await import(path);
+                a.default.add(this);
+            }
+        }
+
+        onRender(deltaTime) {}
+        onResize() {}
+        onReady() {}
+    }
+
+    var DefaultStage = {
+        async setup(canvas, config, clazz) {
+            const stage = {
+                canvas: canvas,
+                config: config,
+                app: clazz,
+            };
+            stage.babylon = this.setupBabylon(stage);
+            stage.engine = this.setupEngine(stage);
+            stage.scene = this.setupScene(stage);
+
+            const cameras = this.setupCameras(stage);
+            if (!Array.isArray(cameras))  {
+                stage.cameras = [cameras];
+            }  else {
+                stage.cameras = cameras;
+            }
+
+            const lights = this.setupLights(stage);
+            if (!Array.isArray(lights))  {
+                stage.lights = [lights];
+            }  else {
+                stage.lights = lights;
+            }
+            stage.lights = lights;
+
+            if (config.usewebxr) {
+                stage.webxr = this.setupWebXR(stage);
+            }
+
+            return stage;
+        },
+
+        setupBabylon(stage) {
+            // if user does not specify, auto-detect if BABYLON is present
+            if (!stage.config.useglobalbabylon) {
+                if (window.BABYLON) { return window.BABYLON; }
+            }
+
+            // if user does specify with true or no value, use BABYLON, error if not present
+            if (stage.config.useglobalbabylon === true || stage.config.useglobalbabylon === "true") {
+                if (window.BABYLON) {
+                    return window.BABYLON;
+                } else {
+                    throw new Error('Babylon is not loaded, setup cannot continue, ensure that window.BABYLON exists')
+                }
+            }
+
+            // Babylon provided by application?
+            if (stage.app.constructor.Babylon) {
+                return stage.app.constructor.Babylon;
+            }
+        },
+
+        setupCameras(stage) {
+            const Babylon = stage.babylon;
+            const camera = new Babylon.UniversalCamera("UniversalCamera", new Babylon.Vector3(0, 0, -10), stage.scene);
+            camera.setTarget(Babylon.Vector3.Zero());
+            camera.attachControl(stage.canvas, true);
+            return [camera];
+        },
+
+        setupEngine(stage) {
+            const Babylon = stage.babylon;
+            const engine = new Babylon.Engine(stage.canvas, true);
+            engine.enableOfflineSupport = false;
+            return engine;
+        },
+
+        setupScene(stage) {
+            const Babylon = stage.babylon;
+            const scene = new Babylon.Scene(stage.engine);
+
+            if (stage.config.showdebuglayer) {
+                scene.debugLayer.show( {
+                    globalRoot: document.body,
+                    handleResize: true
+                });
+            }
+
+            if (stage.config.backgroundcolor) {
+                scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
+            }
+
+            return scene;
+        },
+
+        setupLights(stage) {
+            const Babylon = stage.babylon;
+            const light = new Babylon.HemisphericLight('light', new Babylon.Vector3(0, 1, -1), stage.scene);
+            light.intensity = 0.7;
+            return [light];
+        },
+
+
+        setupWebXR(stage) {
+            console.log('webxr', navigator);
+            if(navigator.xr && !navigator.xr.supportsSession) {
+                navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
+                let originalRequestSession = navigator.xr.requestSession;
+                // change signature
+                navigator.xr.requestSession = function(mode, options) {
+                    return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
+                        let requestReferenceSpace = session.requestReferenceSpace;
+                        // change signature
+                        session.requestReferenceSpace = function(type) {
+                            return requestReferenceSpace.call(this, {type: "identity"});
+                        };
+                        return session;
+                    });
+                };
+            }
+        }
+
+        /*async setupWebXR(stage) {
+            // missing function?
+            if(navigator.xr && !navigator.xr.supportsSession) {
+                navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
+
+                let originalRequestSession = navigator.xr.requestSession;
+                // change signature
+                navigator.xr.requestSession = function(mode, options) {
+                    return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
+                        let requestReferenceSpace = session.requestReferenceSpace;
+
+                        // change signature
+                        session.requestReferenceSpace = function(type) {
+                            return requestReferenceSpace.call(this, {type: "identity"});
+                        };
+
+                        return session;
+                    });
+                };
+            }
+
+        }*/
+
+        /*async setupWebXR(stage) {
+            const xrHelper = await scene.createDefaultXRExperienceAsync();
+            if (!await xrHelper.baseExperience.sessionManager.supportsSessionAsync("immersive-vr")) {
+                return 'failed';
+            }
+
+            xrHelper.baseExperience.onStateChangedObservable.add((state)=>{
+                if(state === Babylon.WebXRState.IN_XR){
+                    // When entering webXR, position the user's feet at 0,0,-1
+                    xrHelper.baseExperience.setPositionOfCameraUsingContainer(new Babylon.Vector3(0,xrHelper.baseExperience.camera.position.y,-1))
+                }
+            });
+
+            xrHelper.input.onControllerAddedObservable.add((controller)=>{
+                stage.controller = controller;
+            });
+
+            return xrHelper;
+        },
+
+        setupWebVR(stage) {
+            const vrHelper = scene.createDefaultVRExperience();
+            vrHelper.enableInteractions();
+            vrHelper.onControllerMeshLoadedObservable.add((controller)=>{
+                stage.controller = controller;
+            });
+
+            return vrHelper;
+        }*/
+    };
+
+    /**
+     * Babylon Scene Description
+     *
+     * @element babylon-scene
+     *
+     * @fires waiting - Use in combination with the "customsetup" attribute to listen for a pause where you can manipulate the stage
+     * @fires playing - Fired when the 3D scene is set up and ready for content and interactivity to be added
+     *
+     * Core Component Attributes
+     * @attr {Boolean} customsetup - if true, will stop setup prior to scene creation to allow the consumer to inject custom logic
+     * @attr {CustomEvent} onwaiting - "waiting" event fires when "customsetup" is set to true to allow the consumer to inject custom logic.
+     * @attr {CustomEvent} onplaying - "playing" event fires when the scene is fully setup and ready for adding logic and 3d objects.
+     * @attr {String} app - path to application class module (relative to your HTML file)
+     * @attr {String} stage - path to stage setup module (relative to your HTML file)
+     *
+     * Stage Attributes
+     * @attr {Boolean} showdebuglayer - if true will automatically load the Babylon.js inspector UI at start
+     * @attr {String} backgroundcolor - when set to a hex color (#ff0000 for red as an example), the Babylon.js background color will be set to this color
+     * @attr {Boolean} useglobalbabylon - if true or not set, the Babylon instance defined on window.BABYLON (if found) will be used. Any built version included on a script tag, like from a CDN (https://cdn.babylonjs.com/babylon.js) will put this in place
+     *
+     * Base Application Attributes
+     * @attr {String} addons - An optional comma separated list of addons to automatically use in your application. See add-ons for more details
+     *
+     * @prop {HTMLCanvasElement} canvas - Canvas used to render 3D scene
+     * @prop {Stage} stage - Stage, or scene configuration containing lights, cameras, etc
+     * @prop {Object} config - Object containing configuration options for component, stage, and application
+     */
+
+
     class BabylonScene extends HTMLElement {
+
         static get CUSTOM_SETUP() {
             return 'customsetup';
         }
 
         constructor() {
             super();
-            this.root = this;
-
             this.attachShadow({mode: 'open'});
             this.canvas = document.createElement('canvas');
             this.shadowRoot.appendChild(this.canvas);
