@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Stage Customization</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/4.0.3/babylon.js"></script>
-    <script type="module" src="../../babylonscene.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/4.1.0-alpha.23/babylon.js"></script>
+    <script type="module" src="../babylon-scene/babylonscene.js"></script>
 
     <style>
         body {
@@ -37,18 +37,27 @@
         }
 
         function onScene(e) {
-            const scene = e.detail.stage.scene;
-            const Babylon = e.detail.stage.babylon;
+            const scene = e.detail.scene;
+            const Babylon = e.detail.babylon;
             const cube = Babylon.MeshBuilder.CreateBox("box", {size: 5}, scene);
             cube.position.y = 1;
             cube.position.z = 5;
+
+            onControllerInteraction(eventtype, pick, button, controller)
+
+            e.detail.application.onControllerInteraction = function(eventtype, pick, button, controller) {
+                console.log(eventtype, pick, button, controller)
+            };
         }
     </script>
 </head>
 <body>
+
 <babylon-scene
+        usewebxr
         customsetup
         usewebxr
+        addons="xrcontrollers"
         onwaiting="onCanvas(event)"
         onplaying="onScene(event)">
 </babylon-scene>

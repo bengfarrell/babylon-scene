@@ -10,6 +10,7 @@ export default class BaseApplication extends EventListener {
         super();
         if (o.stage) {
             o.stage.setup(o.canvas, o.config, this).then( stage => {
+                stage.application = this;
                 this.stage = stage;
                 this.config = o.config;
                 this.stage.engine.runRenderLoop(() => {

@@ -95,75 +95,19 @@ export default {
     },
 
 
-    setupWebXR(stage) {
-        console.log('webxr', navigator);
-        if(navigator.xr && !navigator.xr.supportsSession) {
-            navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
-            let originalRequestSession = navigator.xr.requestSession;
-            // change signature
-            navigator.xr.requestSession = function(mode, options) {
-                return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
-                    let requestReferenceSpace = session.requestReferenceSpace;
-                    // change signature
-                    session.requestReferenceSpace = function(type) {
-                        return requestReferenceSpace.call(this, {type: "identity"});
-                    };
-                    return session;
-                });
-            };
+    async setupWebXR(stage) {
+        const scene = stage.scene;
+        const Babylon = stage.babylon;
+
+        // Check WebXR support in case falling back to WebVR is necessary
+        const environment = scene.createDefaultEnvironment({ enableGroundShadow: true, groundYBias: 1 });
+        const xrHelper = await scene.createDefaultXRExperienceAsync({floorMeshes: [environment.ground]});
+        if(!await xrHelper.baseExperience.sessionManager.supportsSessionAsync("immersive-vr")){
+            const vr = scene.createDefaultVRExperience();
+            vr.fallbackToWebVR = true;
+            return vr;
+        } else {
+            return xrHelper;
         }
-    }
-
-    /*async setupWebXR(stage) {
-        // missing function?
-        if(navigator.xr && !navigator.xr.supportsSession) {
-            navigator.xr.supportsSession = navigator.xr.supportsSessionMode;
-
-            let originalRequestSession = navigator.xr.requestSession;
-            // change signature
-            navigator.xr.requestSession = function(mode, options) {
-                return originalRequestSession.call(this, {mode: mode}, options).then((session) => {
-                    let requestReferenceSpace = session.requestReferenceSpace;
-
-                    // change signature
-                    session.requestReferenceSpace = function(type) {
-                        return requestReferenceSpace.call(this, {type: "identity"});
-                    };
-
-                    return session;
-                });
-            };
-        }
-
-    }*/
-
-    /*async setupWebXR(stage) {
-        const xrHelper = await scene.createDefaultXRExperienceAsync();
-        if (!await xrHelper.baseExperience.sessionManager.supportsSessionAsync("immersive-vr")) {
-            return 'failed';
-        }
-
-        xrHelper.baseExperience.onStateChangedObservable.add((state)=>{
-            if(state === Babylon.WebXRState.IN_XR){
-                // When entering webXR, position the user's feet at 0,0,-1
-                xrHelper.baseExperience.setPositionOfCameraUsingContainer(new Babylon.Vector3(0,xrHelper.baseExperience.camera.position.y,-1))
-            }
-        });
-
-        xrHelper.input.onControllerAddedObservable.add((controller)=>{
-            stage.controller = controller;
-        });
-
-        return xrHelper;
     },
-
-    setupWebVR(stage) {
-        const vrHelper = scene.createDefaultVRExperience();
-        vrHelper.enableInteractions();
-        vrHelper.onControllerMeshLoadedObservable.add((controller)=>{
-            stage.controller = controller;
-        });
-
-        return vrHelper;
-    }*/
 };

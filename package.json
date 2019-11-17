@@ -1,6 +1,6 @@
 {
   "name": "babylon-scene",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "dependencies": {},
   "devDependencies": {
     "@babylonjs/core": "^4.0.3",
