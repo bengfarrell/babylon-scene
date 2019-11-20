@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Stage Customization</title>
+    <title>WebXR</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/4.1.0-alpha.23/babylon.js"></script>
-    <script type="module" src="../babylon-scene/babylonscene.js"></script>
+    <script src="../babylon-scene/babylonscene.nobabylon.js"></script>
 
     <style>
         body {
@@ -21,29 +21,12 @@
     </style>
 
     <script>
-        function onCanvas(e) {
-            e.detail.stage.setupCameras = function (stage) {
-                const Babylon = stage.babylon;
-                const scene = stage.scene;
-                const canvas = stage.canvas;
-                const camera = new Babylon.ArcRotateCamera("Camera", 0, 0, 10, new Babylon.Vector3(0, 0, 0), scene);
-                camera.setPosition(new Babylon.Vector3(0, 0, -20));
-                camera.attachControl(canvas, true);
-                return [camera];
-            };
-
-            // resume setup from the paused state by calling **init**
-            e.target.init();
-        }
-
         function onScene(e) {
             const scene = e.detail.scene;
             const Babylon = e.detail.babylon;
             const cube = Babylon.MeshBuilder.CreateBox("box", {size: 5}, scene);
             cube.position.y = 1;
             cube.position.z = 5;
-
-            onControllerInteraction(eventtype, pick, button, controller)
 
             e.detail.application.onControllerInteraction = function(eventtype, pick, button, controller) {
                 console.log(eventtype, pick, button, controller)
@@ -55,10 +38,7 @@
 
 <babylon-scene
         usewebxr
-        customsetup
-        usewebxr
         addons="xrcontrollers"
-        onwaiting="onCanvas(event)"
         onplaying="onScene(event)">
 </babylon-scene>
 </body>

@@ -35,6 +35,7 @@ Keep in mind, if you override the **Stage**, these attributes may not work as th
 - **showdebuglayer** (in setupScene method) - if true will automatically load the Babylon.js inspector UI at start
 - **backgroundcolor** (in setupScene method) - when set to a hex color (#ff0000 for red as an example), the Babylon.js background color will be set to this color
 - **useglobalbabylon** (in setupBabylon method) - if true or not set, the Babylon instance defined on window.BABYLON (if found) will be used. Any built version included on a script tag, like from a CDN (https://cdn.babylonjs.com/babylon.js) will put this in place
+- **usewebxr** (in setupBabylon method) - if present, will enter a WebVR session where user can click a button to enter immersive mode (WARNING: Experimental, read about support [here](?id=webxr-experimental))
 
 The [BaseApplication](https://github.com/bengfarrell/babylon-scene/blob/master/src/baseapplication.js) class allows one attribute right now. As with the **Stage** level attributes, if another Application module is used that does not
 extend the BaseApplication provided by this component, this attribute will not work
@@ -186,7 +187,7 @@ uses hex color format (ex: #RRGGBB), while **showdebuglayer** doesn't need to be
 
 * **Babylon** - Finds Babylon.js for use in the rest of the stage setup and application
 
-* **WebXR** - Coming Soon!
+* **WebXR** - EXPERIMENTAL: Uses WebVR spec only currently, but eventually will likely use WebXR only as WebVR goes away
 
 While defaults are great for getting started and playing around, you'll likely want to customize your **stage**
 really quickly after adding content. As with adding custom content, there is a quick and easy way to customize the
@@ -557,3 +558,40 @@ object is passed as the first and only parameter to the handler which provides t
 and the second parameter is a Bablyon.js [pointerInfo](https://doc.babylonjs.com/api/classes/babylon.pointerinfo) object.
 
 [Pointer Add-on Example](/addons/pointerinput)
+
+# WebXR (experimental)
+Simply by adding the **usewebxr** attribute on the **&lt;babylon-scene&gt;** tag, the WebXR stage setup will be triggered. Despite calling it WebXR here, only the **WebVR**
+spec is currently supported. This means that **&lt;babylon-scene&gt;** supports cardboard/phone devices as well as the Oculus Quest.
+
+In early December 2019, Chrome should ship with the newest spec, now called WebXR. This project will gradually adopt WebXR as well and will auto-detect the right specification for your
+device. Hopefully, WebVR will die fairly soon, and WebXR will actually mean WebXR only here.
+
+Also note that the version of Babylon.js included in this project does NOT support this feature. Instead, use the 4.1 preview version, which among other places can be found
+here: https://cdnjs.cloudflare.com/ajax/libs/babylonjs/4.1.0-alpha.23/babylon.js
+
+In addition to being able to enter immersive mode in a headset, an additional addon has been created to listen for touch controller events.
+
+Example setup could include the following HTML:
+
+```html
+<babylon-scene
+        usewebxr
+        addons="xrcontrollers"
+        app="myapp.js">
+</babylon-scene>
+```
+
+And then in your custom application, an **onControllerEvent** handler can be added:
+
+```js
+onControllerInteraction(eventtype, pick, button, controller) {
+    // Event type is a string indicating which button/trigger/pad was pressed
+    // Pick which mesh in your scene (if any) was hit by raycasting from the controller
+    // Button is an object containing information about the button being pressed, touched, or triggered in some way
+    // Controller is an object containing information about the controller which initiated the event
+    console.log(eventtype, pick, button, controller)
+};
+```
+
+[WebXR Example](/webxr/webxr)
+
