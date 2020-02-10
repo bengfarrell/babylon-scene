@@ -14,6 +14,19 @@ will be the ultimate reference for doing so.
 
 > The "stage" attribute is used to override the [default initial scene setup](?id=the-stage-lights-cameras-etc) which includes lights, cameras, 3D engine, etc.
 
+To go beyond the above example and create something that's easily bundled, **&lt;babylon-scene&gt;** provides an [extender method](/babylon-loading/extending) to easily create your own custom **&lt;babylon-scene&gt;** based component.
+
+```js
+import {defineCustomScene} from "../babylon-scene/babylonscene.js";
+import SampleApp from './sample-app.js';
+import CustomStage from './custom-stage.js';
+defineCustomScene('my-custom-scene', SampleApp, CustomStage);
+```
+
+```html
+<my-custom-scene></my-custom-scene>
+```
+
 # Component Attributes
 
 There are only a few core options/attributes for the component itself. The following three are used for customizing the application
@@ -158,6 +171,9 @@ a **playing** event and using the **customsetup** attribute , you would assign y
 Using the **app** attribute is documented extensively [here](?id=custom-application-classes).
 
 [Demo](adding-content/adding-content-es6-modules)
+
+One issue with the above would be when you're ready to incorporate with the rest of your application and you might want to use a bundler to create a build, as with Rollup.js.
+To go beyond and create something that's easily bundled, **&lt;babylon-scene&gt;** provides an [extender method](/babylon-loading/extending) to create your own custom **&lt;babylon-scene&gt;** based component.
 
 ## The Stage (Lights, Cameras, etc)
 
@@ -309,7 +325,11 @@ The **&lt;babylon-scene&gt;** component is packaged up two different ways (as we
 <babylon-scene></babylon-scene>
 ```
 
-[Built-in Babylon Example](/babylon-loading/builtin-babylon)
+[Built-in Babylon Example](
+
+
+
+builtin-babylon)
 
 ## Babylon from a CDN
 

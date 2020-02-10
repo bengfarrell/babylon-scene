@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Extending babylon-scene to create custom element</title>
+    <script src="../babylon-scene/babylonscene.full.js"></script>
+    <script src="./mycustomscene.js" type="module"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        babylon-scene {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+<my-custom-scene></my-custom-scene>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- Importing babylonscene.full.js is a bit redundant here, but it's here just to import babylon without needing es-dev-server to use Babylon as ES6 modules -->
+    <script src="../babylon-scene/babylonscene.full.js"></script>
+    <script type="module">
+        import {defineCustomScene} from "../babylon-scene/babylonscene.js";
+        import SampleApp from './sample-app.js';
+        import SampleApp2 from './sample-app2.js';
+        import CustomStage from './custom-stage.js';
+        defineCustomScene('my-custom-scene', SampleApp, CustomStage);
+        defineCustomScene('my-custom-scene2', SampleApp2, CustomStage);
+    </script>
+</head>
+<body>
+    <my-custom-scene></my-custom-scene>
+    <my-custom-scene2></my-custom-scene2>
+</body>
+</html>

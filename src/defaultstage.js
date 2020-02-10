@@ -101,13 +101,6 @@ export default {
 
         // Check WebXR support in case falling back to WebVR is necessary
         const environment = scene.createDefaultEnvironment({ enableGroundShadow: true, groundYBias: 1 });
-        const xrHelper = await scene.createDefaultXRExperienceAsync({floorMeshes: [environment.ground]});
-        if(!await xrHelper.baseExperience.sessionManager.supportsSessionAsync("immersive-vr")){
-            const vr = scene.createDefaultVRExperience();
-            vr.fallbackToWebVR = true;
-            return vr;
-        } else {
-            return xrHelper;
-        }
+        return await scene.createDefaultXRExperienceAsync({floorMeshes: [environment.ground]});
     },
 };

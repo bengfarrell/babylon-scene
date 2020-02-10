@@ -10,5 +10,19 @@
  </babylon-scene>
  ```
 
+ As a way to try out Babylon.js, the above will provide a pretty great and easily code-able playground. When it's time to distribute/bundle, however, **&lt;babylon-scene&gt;** provides a way to easily
+ extend itself, wrapping itself and your custom logic into a custom element that you name. More importantly, solutions like Rollup.js can easily bundle your custom element.
+
+ ```javascript
+import {defineCustomScene} from "../babylon-scene/babylonscene.js";
+import SampleApp from './sample-app.js';
+import CustomStage from './custom-stage.js';
+defineCustomScene('my-custom-scene', SampleApp, CustomStage);
+ ```
+
+ html```
+ <my-custom-scene></my-custom-scene>
+ ```
+
 Documentation for **&lt;babylon-scene&gt;** can be found at
 [https://bengfarrell.github.io/babylon-scene](https://bengfarrell.github.io/babylon-scene)

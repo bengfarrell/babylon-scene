@@ -32,11 +32,6 @@ import {urlResolve} from "./url-resolver.js";
 
 
 export default class BabylonScene extends HTMLElement {
-
-    static get CUSTOM_SETUP() {
-        return 'customsetup';
-    }
-
     constructor() {
         super();
         this.attachShadow({mode: 'open'});
@@ -45,12 +40,7 @@ export default class BabylonScene extends HTMLElement {
     }
 
     init(app) {
-        if (!app) {
-            this.application = new DefaultApplication(this);
-        } else {
-            this.application = app;
-        }
-
+        this.application = new app(this);
         const listener = this.application.addEventListener('ready', () => {
             this.application.removeEventListener(listener);
             this.onSceneCreated();
@@ -59,12 +49,28 @@ export default class BabylonScene extends HTMLElement {
 
     set stage(val) {
         this._stage = val;
-        this.init(app);
     }
 
     get stage() {
         return this._stage;
     }
+
+    set app(val) {
+        this._app = val;
+    }
+
+    get app() {
+        return this._app;
+    }
+
+    /*set stage(val) {
+        this._stage = val;
+        this.init(app);
+    }
+
+    get stage() {
+        return this._stage;
+    }*/
 
     onSceneCreated() {
         const ce = new CustomEvent('playing', {
@@ -96,23 +102,28 @@ export default class BabylonScene extends HTMLElement {
         this.config.babylonComponent = this;
 
         if (this.config.stage) {
+            // stage from attribute path using dynamically linked import
             const absPath = urlResolve(this.config.stage).href;
             const {default: CustomStage} = await import(absPath);
             this._stage = CustomStage;
-        } else {
+        } else if (!this._stage) {
+            // if stage hasn't been set, use default
             this._stage = DefaultStage;
         }
 
         if (this.config.app) {
+            // app from attribute path using dynamically linked imports
             const absPath = urlResolve(this.config.app).href;
             const {default: App} = await import(absPath);
             this.init(new App(this));
             return;
-        }
-
-        if (!this.config.customsetup) {
-            this.init();
+        } else if (this._app) {
+            // app from property setter
+            this.init(this._app);
             return;
+        } else if (!this.config.customsetup) {
+            // if none of these are set and we aren't using custom setup, use default application
+            this.init(DefaultApplication);
         }
 
         const ce = new CustomEvent('waiting', {
