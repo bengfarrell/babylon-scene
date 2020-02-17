@@ -416,15 +416,6 @@ var babylonscene = (function () {
             return this._app;
         }
 
-        /*set stage(val) {
-            this._stage = val;
-            this.init(app);
-        }
-
-        get stage() {
-            return this._stage;
-        }*/
-
         onSceneCreated() {
             const ce = new CustomEvent('playing', {
                 bubbles: true,
@@ -468,7 +459,7 @@ var babylonscene = (function () {
                 // app from attribute path using dynamically linked imports
                 const absPath = urlResolve(this.config.app).href;
                 const {default: App} = await import(absPath);
-                this.init(new App(this));
+                this.init(App);
                 return;
             } else if (this._app) {
                 // app from property setter
