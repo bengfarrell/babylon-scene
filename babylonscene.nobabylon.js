@@ -267,6 +267,7 @@ var babylonscene = (function () {
             }  else {
                 stage.cameras = cameras;
             }
+            stage.camera = cameras[0];
 
             const lights = this.setupLights(stage);
             if (!Array.isArray(lights))  {
