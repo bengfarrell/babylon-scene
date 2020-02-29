@@ -40,6 +40,7 @@ export default class BabylonScene extends HTMLElement {
     }
 
     init(app) {
+        if (!app) { app = DefaultApplication; }
         this.application = new app(this);
         const listener = this.application.addEventListener('ready', () => {
             this.application.removeEventListener(listener);

@@ -14,8 +14,8 @@ import {urlResolve} from "./url-resolver.js";
  * @attr {Boolean} customsetup - if true, will stop setup prior to scene creation to allow the consumer to inject custom logic
  * @attr {CustomEvent} onwaiting - "waiting" event fires when "customsetup" is set to true to allow the consumer to inject custom logic.
  * @attr {CustomEvent} onplaying - "playing" event fires when the scene is fully setup and ready for adding logic and 3d objects.
- * @attr {String} app - path to application class module (relative to your HTML file)
- * @attr {String} stage - path to stage setup module (relative to your HTML file)
+ * @attr {String|Object} app - path to application class module (relative to your HTML file) or the actual class itself if set through JS
+ * @attr {String|Object} stage - path to stage setup module (relative to your HTML file) or the actual object itself if set through JS
  *
  * Stage Attributes
  * @attr {Boolean} showdebuglayer - if true will automatically load the Babylon.js inspector UI at start
@@ -40,6 +40,7 @@ export default class BabylonScene extends HTMLElement {
     }
 
     init(app) {
+        if (!app) { app = DefaultApplication; }
         this.application = new app(this);
         const listener = this.application.addEventListener('ready', () => {
             this.application.removeEventListener(listener);

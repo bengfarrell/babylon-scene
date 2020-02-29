@@ -5,8 +5,8 @@
   "main": "babylonscene.js",
   "module": "babylonscene.js",
   "devDependencies": {
-    "@babylonjs/core": "^4.0.3",
-    "babylonjs": "^4.0.3",
+    "@babylonjs/core": "^4.1.0",
+    "babylonjs": "^4.1.0",
     "concat-files": "^0.1.1",
     "copy": "^0.3.2",
     "rollup": "^1.19.4"

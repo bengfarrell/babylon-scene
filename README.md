@@ -26,3 +26,14 @@ defineCustomScene('my-custom-scene', SampleApp, CustomStage);
 
 Documentation for **&lt;babylon-scene&gt;** can be found at
 [https://bengfarrell.github.io/babylon-scene](https://bengfarrell.github.io/babylon-scene)
+
+Releases
+--------
+
+v0.4.0
+======
+
+- Better `app` and `stage` property setter to support direct Class setting via JS (in addition to path/string based dynamic module setting)
+- Added BabylonScene.defineCustomScene static method to define new custom elements with `app` and `stage` baked in (use <my-custom-scene> instead of <babylon-scene app="..." stage="...">)
+- Single camera property from stage (still supports multiple cameras, but added convenience property to avoid stage.cameras[0])
+- Upgrade to Babylon.js 4.1

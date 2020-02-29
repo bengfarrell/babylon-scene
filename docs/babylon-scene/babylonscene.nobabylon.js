@@ -394,6 +394,7 @@ var babylonscene = (function () {
         }
 
         init(app) {
+            if (!app) { app = BaseApplication; }
             this.application = new app(this);
             const listener = this.application.addEventListener('ready', () => {
                 this.application.removeEventListener(listener);

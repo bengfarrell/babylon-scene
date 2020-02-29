@@ -4,7 +4,7 @@
     {
       "name": "babylon-scene",
       "description": "Babylon Scene Description",
-      "jsDoc": "/**\n * Babylon Scene Description\n *\n * @element babylon-scene\n *\n * @fires waiting - Use in combination with the \"customsetup\" attribute to listen for a pause where you can manipulate the stage\n * @fires playing - Fired when the 3D scene is set up and ready for content and interactivity to be added\n *\n * Core Component Attributes\n * @attr {Boolean} customsetup - if true, will stop setup prior to scene creation to allow the consumer to inject custom logic\n * @attr {CustomEvent} onwaiting - \"waiting\" event fires when \"customsetup\" is set to true to allow the consumer to inject custom logic.\n * @attr {CustomEvent} onplaying - \"playing\" event fires when the scene is fully setup and ready for adding logic and 3d objects.\n * @attr {String} app - path to application class module (relative to your HTML file)\n * @attr {String} stage - path to stage setup module (relative to your HTML file)\n *\n * Stage Attributes\n * @attr {Boolean} showdebuglayer - if true will automatically load the Babylon.js inspector UI at start\n * @attr {String} backgroundcolor - when set to a hex color (#ff0000 for red as an example), the Babylon.js background color will be set to this color\n * @attr {Boolean} useglobalbabylon - if true or not set, the Babylon instance defined on window.BABYLON (if found) will be used. Any built version included on a script tag, like from a CDN (https://cdn.babylonjs.com/babylon.js) will put this in place\n *\n * Base Application Attributes\n * @attr {String} addons - An optional comma separated list of addons to automatically use in your application. See add-ons for more details\n *\n * @prop {HTMLCanvasElement} canvas - Canvas used to render 3D scene\n * @prop {Stage} stage - Stage, or scene configuration containing lights, cameras, etc\n * @prop {Object} config - Object containing configuration options for component, stage, and application\n */",
+      "jsDoc": "/**\n * Babylon Scene Description\n *\n * @element babylon-scene\n *\n * @fires waiting - Use in combination with the \"customsetup\" attribute to listen for a pause where you can manipulate the stage\n * @fires playing - Fired when the 3D scene is set up and ready for content and interactivity to be added\n *\n * Core Component Attributes\n * @attr {Boolean} customsetup - if true, will stop setup prior to scene creation to allow the consumer to inject custom logic\n * @attr {CustomEvent} onwaiting - \"waiting\" event fires when \"customsetup\" is set to true to allow the consumer to inject custom logic.\n * @attr {CustomEvent} onplaying - \"playing\" event fires when the scene is fully setup and ready for adding logic and 3d objects.\n * @attr {String|Object} app - path to application class module (relative to your HTML file) or the actual class itself if set through JS\n * @attr {String|Object} stage - path to stage setup module (relative to your HTML file) or the actual object itself if set through JS\n *\n * Stage Attributes\n * @attr {Boolean} showdebuglayer - if true will automatically load the Babylon.js inspector UI at start\n * @attr {String} backgroundcolor - when set to a hex color (#ff0000 for red as an example), the Babylon.js background color will be set to this color\n * @attr {Boolean} useglobalbabylon - if true or not set, the Babylon instance defined on window.BABYLON (if found) will be used. Any built version included on a script tag, like from a CDN (https://cdn.babylonjs.com/babylon.js) will put this in place\n *\n * Base Application Attributes\n * @attr {String} addons - An optional comma separated list of addons to automatically use in your application. See add-ons for more details\n *\n * @prop {HTMLCanvasElement} canvas - Canvas used to render 3D scene\n * @prop {Stage} stage - Stage, or scene configuration containing lights, cameras, etc\n * @prop {Object} config - Object containing configuration options for component, stage, and application\n */",
       "attributes": [
         {
           "name": "customsetup",
@@ -22,11 +22,6 @@
           "type": "any"
         },
         {
-          "name": "app",
-          "description": "path to application class module (relative to your HTML file)",
-          "type": "string"
-        },
-        {
           "name": "showdebuglayer",
           "description": "if true will automatically load the Babylon.js inspector UI at start",
           "type": "boolean"
@@ -40,6 +35,11 @@
           "name": "addons",
           "description": "An optional comma separated list of addons to automatically use in your application. See add-ons for more details",
           "type": "string"
+        },
+        {
+          "name": "app",
+          "description": "path to application class module (relative to your HTML file) or the actual class itself if set through JS",
+          "type": "string | {}"
         }
       ],
       "properties": [
@@ -55,6 +55,11 @@
         {
           "name": "stage",
           "type": "any"
+        },
+        {
+          "name": "app",
+          "description": "path to application class module (relative to your HTML file) or the actual class itself if set through JS",
+          "type": "string | {}"
         }
       ],
       "events": [
