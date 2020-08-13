@@ -41,6 +41,14 @@ Alternately, the "app" and "stage" attributes are the recommended way to customi
 - **app (string)** - path to application class module (relative to your HTML file)
 - **stage (string)** - path to stage setup module (relative to your HTML file)
 
+All attributes are for setup, and aren't observed. The one exception to this is the "hidden" attribute:
+
+- **hidden (boolean)** - Having the "hidden" attribute on the component will hide the entire component, making it `display: none`
+
+When the attribute is changed on the component, the internal 3D stage will be resized to ensure the canvas and 3D engine are always
+showing at the full size of the component. Internally, Babylon's "engine.resize()" is called, and your application's custom "onResize" method 
+will also be called
+
 Beyond that, all attributes on the component (except "style" and "class") will be added to a "config" object and added to the [Stage](?id=the-stage-lights-cameras-etc) setup result which is accessible from the [application](?id=custom-application-classes).
 This means that any attribute added to the component will make its way through to the **Stage** or custom application. The default **Stage**, does listen to a few attributes itself.
 Keep in mind, if you override the **Stage**, these attributes may not work as they are part of the default setup code.

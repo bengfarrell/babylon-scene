@@ -32,11 +32,37 @@ import {urlResolve} from "./url-resolver.js";
 
 
 export default class BabylonScene extends HTMLElement {
+    static get observedAttributes() { return ['hidden']; }
+
     constructor() {
         super();
         this.attachShadow({mode: 'open'});
-        this.canvas = document.createElement('canvas');
-        this.shadowRoot.appendChild(this.canvas);
+        this.shadowRoot.innerHTML = `
+            <canvas></canvas>
+            <style>
+                :host {
+                    display: inline-block;
+                }
+                
+                :host([hidden]) {
+                    display: none;
+                }
+                
+                canvas {
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+        `;
+
+        this.canvas = this.shadowRoot.querySelector('canvas');
+    }
+
+    resize() {
+        if (this.application && this.application.onResize) {
+            this.application.stage.engine.resize();
+            this.application.onResize();
+        }
     }
 
     init(app) {
@@ -73,14 +99,16 @@ export default class BabylonScene extends HTMLElement {
         this.sceneIsReady = true;
     }
 
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'hidden') {
+            this.resize();
+        }
+    }
+
     async connectedCallback() {
         // when using show debug layer, component gets reparented and this is called twice
         if (this._connectedCallbackFired) { return; }
         this._connectedCallbackFired = true;
-
-        this.style.display = 'inline-block';
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
 
         this.config = {};
 
