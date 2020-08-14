@@ -82,7 +82,17 @@ export default {
         }
 
         if (stage.config.backgroundcolor) {
-            scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
+            let clr = stage.config.backgroundcolor;
+            if (clr.charAt(0) !== '#') {
+                clr = `#${clr}`;
+            }
+            while (clr.length < 7) {
+                clr += '0';
+            }
+            while (clr.length < 9) {
+                clr += 'f';
+            }
+            scene.clearColor = Babylon.Color4.FromHexString(clr);
         }
 
         return scene;
