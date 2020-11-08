@@ -11,4 +11,4 @@
  ```
 
 Documentation for **&lt;babylon-scene&gt;** can be found at
-[https://bengfarrell.github.io/babylon-scene/docs](https://bengfarrell.github.io/babylon-scene/docs)
+[https://bengfarrell.github.io/babylon-scene](https://bengfarrell.github.io/babylon-scene)
