@@ -30,6 +30,14 @@ Documentation for **&lt;babylon-scene&gt;** can be found at
 Releases
 --------
 
+v0.4.1
+======
+
+- Upgrade to Babylon.js 4.2
+- Allow `showdebuglayer` to work with ES6 modules
+- Add @web/dev-server for demo serving so you're not on your own when pulling this repo and running examples
+
+
 v0.4.0
 ======
 

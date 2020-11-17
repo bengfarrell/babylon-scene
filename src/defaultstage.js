@@ -1,5 +1,3 @@
-import BabylonScene from './babylonscene.js';
-
 export default {
     async setup(canvas, config, clazz) {
         const stage = {
@@ -75,6 +73,10 @@ export default {
         const scene = new Babylon.Scene(stage.engine);
 
         if (stage.config.showdebuglayer) {
+            // Unfortunately, BABYLON needs to be top-level for the inspector to work
+            if (!window.BABYLON) {
+                window.BABYLON= Babylon;
+            }
             scene.debugLayer.show( {
                 globalRoot: document.body,
                 handleResize: true

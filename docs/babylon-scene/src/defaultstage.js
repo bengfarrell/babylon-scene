@@ -1,5 +1,3 @@
-import BabylonScene from './babylonscene.js';
-
 export default {
     async setup(canvas, config, clazz) {
         const stage = {
@@ -75,6 +73,10 @@ export default {
         const scene = new Babylon.Scene(stage.engine);
 
         if (stage.config.showdebuglayer) {
+            // Unfortunately, BABYLON needs to be top-level for the inspector to work
+            if (!window.BABYLON) {
+                window.BABYLON= Babylon;
+            }
             scene.debugLayer.show( {
                 globalRoot: document.body,
                 handleResize: true
@@ -82,7 +84,17 @@ export default {
         }
 
         if (stage.config.backgroundcolor) {
-            scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
+            let clr = stage.config.backgroundcolor;
+            if (clr.charAt(0) !== '#') {
+                clr = `#${clr}`;
+            }
+            while (clr.length < 7) {
+                clr += '0';
+            }
+            while (clr.length < 9) {
+                clr += 'f';
+            }
+            scene.clearColor = Babylon.Color4.FromHexString(clr);
         }
 
         return scene;

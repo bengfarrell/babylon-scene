@@ -325,6 +325,10 @@ var babylonscene = (function () {
             const scene = new Babylon.Scene(stage.engine);
 
             if (stage.config.showdebuglayer) {
+                // Unfortunately, BABYLON needs to be top-level for the inspector to work
+                if (!window.BABYLON) {
+                    window.BABYLON= Babylon;
+                }
                 scene.debugLayer.show( {
                     globalRoot: document.body,
                     handleResize: true
@@ -332,7 +336,17 @@ var babylonscene = (function () {
             }
 
             if (stage.config.backgroundcolor) {
-                scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
+                let clr = stage.config.backgroundcolor;
+                if (clr.charAt(0) !== '#') {
+                    clr = `#${clr}`;
+                }
+                while (clr.length < 7) {
+                    clr += '0';
+                }
+                while (clr.length < 9) {
+                    clr += 'f';
+                }
+                scene.clearColor = Babylon.Color4.FromHexString(clr);
             }
 
             return scene;
@@ -368,8 +382,8 @@ var babylonscene = (function () {
      * @attr {Boolean} customsetup - if true, will stop setup prior to scene creation to allow the consumer to inject custom logic
      * @attr {CustomEvent} onwaiting - "waiting" event fires when "customsetup" is set to true to allow the consumer to inject custom logic.
      * @attr {CustomEvent} onplaying - "playing" event fires when the scene is fully setup and ready for adding logic and 3d objects.
-     * @attr {String} app - path to application class module (relative to your HTML file)
-     * @attr {String} stage - path to stage setup module (relative to your HTML file)
+     * @attr {String|Object} app - path to application class module (relative to your HTML file) or the actual class itself if set through JS
+     * @attr {String|Object} stage - path to stage setup module (relative to your HTML file) or the actual object itself if set through JS
      *
      * Stage Attributes
      * @attr {Boolean} showdebuglayer - if true will automatically load the Babylon.js inspector UI at start
@@ -386,11 +400,37 @@ var babylonscene = (function () {
 
 
     class BabylonScene extends HTMLElement {
+        static get observedAttributes() { return ['hidden']; }
+
         constructor() {
             super();
             this.attachShadow({mode: 'open'});
-            this.canvas = document.createElement('canvas');
-            this.shadowRoot.appendChild(this.canvas);
+            this.shadowRoot.innerHTML = `
+            <canvas></canvas>
+            <style>
+                :host {
+                    display: inline-block;
+                }
+                
+                :host([hidden]) {
+                    display: none;
+                }
+                
+                canvas {
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+        `;
+
+            this.canvas = this.shadowRoot.querySelector('canvas');
+        }
+
+        resize() {
+            if (this.application && this.application.onResize) {
+                this.application.stage.engine.resize();
+                this.application.onResize();
+            }
         }
 
         init(app) {
@@ -427,14 +467,16 @@ var babylonscene = (function () {
             this.sceneIsReady = true;
         }
 
+        attributeChangedCallback(name, oldValue, newValue) {
+            if (name === 'hidden') {
+                this.resize();
+            }
+        }
+
         async connectedCallback() {
             // when using show debug layer, component gets reparented and this is called twice
             if (this._connectedCallbackFired) { return; }
             this._connectedCallbackFired = true;
-
-            this.style.display = 'inline-block';
-            this.canvas.style.width = '100%';
-            this.canvas.style.height = '100%';
 
             this.config = {};
 

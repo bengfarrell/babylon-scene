@@ -14,8 +14,8 @@ import {urlResolve} from "./url-resolver.js";
  * @attr {Boolean} customsetup - if true, will stop setup prior to scene creation to allow the consumer to inject custom logic
  * @attr {CustomEvent} onwaiting - "waiting" event fires when "customsetup" is set to true to allow the consumer to inject custom logic.
  * @attr {CustomEvent} onplaying - "playing" event fires when the scene is fully setup and ready for adding logic and 3d objects.
- * @attr {String} app - path to application class module (relative to your HTML file)
- * @attr {String} stage - path to stage setup module (relative to your HTML file)
+ * @attr {String|Object} app - path to application class module (relative to your HTML file) or the actual class itself if set through JS
+ * @attr {String|Object} stage - path to stage setup module (relative to your HTML file) or the actual object itself if set through JS
  *
  * Stage Attributes
  * @attr {Boolean} showdebuglayer - if true will automatically load the Babylon.js inspector UI at start
@@ -32,11 +32,37 @@ import {urlResolve} from "./url-resolver.js";
 
 
 export default class BabylonScene extends HTMLElement {
+    static get observedAttributes() { return ['hidden']; }
+
     constructor() {
         super();
         this.attachShadow({mode: 'open'});
-        this.canvas = document.createElement('canvas');
-        this.shadowRoot.appendChild(this.canvas);
+        this.shadowRoot.innerHTML = `
+            <canvas></canvas>
+            <style>
+                :host {
+                    display: inline-block;
+                }
+                
+                :host([hidden]) {
+                    display: none;
+                }
+                
+                canvas {
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+        `;
+
+        this.canvas = this.shadowRoot.querySelector('canvas');
+    }
+
+    resize() {
+        if (this.application && this.application.onResize) {
+            this.application.stage.engine.resize();
+            this.application.onResize();
+        }
     }
 
     init(app) {
@@ -73,14 +99,16 @@ export default class BabylonScene extends HTMLElement {
         this.sceneIsReady = true;
     }
 
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'hidden') {
+            this.resize();
+        }
+    }
+
     async connectedCallback() {
         // when using show debug layer, component gets reparented and this is called twice
         if (this._connectedCallbackFired) { return; }
         this._connectedCallbackFired = true;
-
-        this.style.display = 'inline-block';
-        this.canvas.style.width = '100%';
-        this.canvas.style.height = '100%';
 
         this.config = {};
 

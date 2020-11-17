@@ -1,19 +1,20 @@
 {
   "name": "babylon-scene",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "dependencies": {},
   "main": "babylonscene.js",
   "module": "babylonscene.js",
   "devDependencies": {
-    "@babylonjs/core": "^4.1.0",
-    "babylonjs": "^4.1.0",
+    "@babylonjs/core": "^4.2.0",
+    "babylonjs": "^4.2.0",
     "concat-files": "^0.1.1",
     "copy": "^0.3.2",
-    "rollup": "^1.19.4"
+    "rollup": "^1.19.4",
+    "@web/dev-server": "~0.0.17"
   },
   "scripts": {
     "build": "node_modules/.bin/rollup -c rollup.config.js && node ./bin/build.js",
-    "test-babylon-loading": "npx es-dev-server --watch --node-resolve --open docs/babylon-loading",
+    "test-babylon-loading": "npx ./node_modules/.bin/web-dev-server --watch --node-resolve --open docs/babylon-loading",
     "analyze": "wca analyze src --format json --outFile custom-elements.json"
   }
 }
