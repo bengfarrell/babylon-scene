@@ -22,6 +22,7 @@ export default {
         }  else {
             stage.cameras = cameras;
         }
+        stage.camera = cameras[0];
 
         const lights = this.setupLights(stage);
         if (!Array.isArray(lights))  {
@@ -30,7 +31,15 @@ export default {
             stage.lights = lights;
         }
         stage.lights = lights;
-        
+
+        if (config.usewebxr) {
+            stage.webxr = this.setupWebXR(stage);
+        }
+
+        if (config.showdebuglayer) {
+            this.setupDebugLayer(stage);
+        }
+
         return stage;
     },
 
@@ -74,18 +83,36 @@ export default {
         const Babylon = stage.babylon;
         const scene = new Babylon.Scene(stage.engine);
 
-        if (stage.config.showdebuglayer) {
-            scene.debugLayer.show( {
-                globalRoot: document.body,
-                handleResize: true
-            });
-        }
-
         if (stage.config.backgroundcolor) {
-            scene.clearColor = Babylon.Color3.FromHexString(stage.config.backgroundcolor);
+            let clr = stage.config.backgroundcolor;
+            if (clr.charAt(0) !== '#') {
+                clr = `#${clr}`;
+            }
+            while (clr.length < 7) {
+                clr += '0';
+            }
+            while (clr.length < 9) {
+                clr += 'f';
+            }
+            scene.clearColor = Babylon.Color4.FromHexString(clr);
         }
 
         return scene;
+    },
+
+    setupDebugLayer(stage) {
+        // Unfortunately, BABYLON needs to be top-level for the inspector to work
+        if (!window.BABYLON) {
+            window.BABYLON = stage.babylon;
+        }
+        stage.scene.debugLayer.show(this.debugLayerOptions());
+    },
+
+    debugLayerOptions() {
+        return {
+            globalRoot: document.body,
+            handleResize: true
+        }
     },
 
     setupLights(stage) {
@@ -93,7 +120,17 @@ export default {
         const light = new Babylon.HemisphericLight('light', new Babylon.Vector3(0, 1, -1), stage.scene);
         light.intensity = 0.7;
         return [light];
-    }
+    },
+
+
+    async setupWebXR(stage) {
+        const scene = stage.scene;
+        const Babylon = stage.babylon;
+
+        // Check WebXR support in case falling back to WebVR is necessary
+        const environment = scene.createDefaultEnvironment({ enableGroundShadow: true, groundYBias: 1 });
+        return await scene.createDefaultXRExperienceAsync({floorMeshes: [environment.ground]});
+    },
 };
 
 ```

@@ -29,6 +29,10 @@ export default {
             stage.webxr = this.setupWebXR(stage);
         }
 
+        if (config.showdebuglayer) {
+            this.setupDebugLayer(stage);
+        }
+
         return stage;
     },
 
@@ -72,17 +76,6 @@ export default {
         const Babylon = stage.babylon;
         const scene = new Babylon.Scene(stage.engine);
 
-        if (stage.config.showdebuglayer) {
-            // Unfortunately, BABYLON needs to be top-level for the inspector to work
-            if (!window.BABYLON) {
-                window.BABYLON= Babylon;
-            }
-            scene.debugLayer.show( {
-                globalRoot: document.body,
-                handleResize: true
-            });
-        }
-
         if (stage.config.backgroundcolor) {
             let clr = stage.config.backgroundcolor;
             if (clr.charAt(0) !== '#') {
@@ -98,6 +91,21 @@ export default {
         }
 
         return scene;
+    },
+
+    setupDebugLayer(stage) {
+        // Unfortunately, BABYLON needs to be top-level for the inspector to work
+        if (!window.BABYLON) {
+            window.BABYLON = stage.babylon;
+        }
+        stage.scene.debugLayer.show(this.debugLayerOptions());
+    },
+
+    debugLayerOptions() {
+        return {
+            globalRoot: document.body,
+            handleResize: true
+        }
     },
 
     setupLights(stage) {
