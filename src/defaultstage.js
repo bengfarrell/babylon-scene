@@ -9,8 +9,8 @@ export default {
         stage.engine = this.setupEngine(stage);
         stage.scene = this.setupScene(stage);
 
-        const cameras = this.setupCameras(stage);
-        stage.camera = cameras.primary;
+        stage.cameras = this.setupCameras(stage);
+        stage.camera = stage.cameras.primary;
 
         const lights = this.setupLights(stage);
         if (!Array.isArray(lights))  {
