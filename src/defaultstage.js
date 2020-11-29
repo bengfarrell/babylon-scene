@@ -10,12 +10,7 @@ export default {
         stage.scene = this.setupScene(stage);
 
         const cameras = this.setupCameras(stage);
-        if (!Array.isArray(cameras))  {
-            stage.cameras = [cameras];
-        }  else {
-            stage.cameras = cameras;
-        }
-        stage.camera = cameras[0];
+        stage.camera = cameras.primary;
 
         const lights = this.setupLights(stage);
         if (!Array.isArray(lights))  {
@@ -62,7 +57,7 @@ export default {
         const camera = new Babylon.UniversalCamera("UniversalCamera", new Babylon.Vector3(0, 0, -10), stage.scene);
         camera.setTarget(Babylon.Vector3.Zero());
         camera.attachControl(stage.canvas, true);
-        return [camera];
+        return { primary: camera };
     },
 
     setupEngine(stage) {
